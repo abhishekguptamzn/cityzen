@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cityzen — Smart City App Modules</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #0a0f0d;
+    --bg2: #111a16;
+    --card: #141f1a;
+    --card-hover: #1a2b24;
+    --border: #1e3329;
+    --border-light: #2a4a3c;
+    --fg: #e8f0ec;
+    --fg-muted: #7a9b8a;
+    --accent: #00e68a;
+    --accent2: #00cc7a;
+    --accent-dim: rgba(0,230,138,0.1);
+    --accent-glow: rgba(0,230,138,0.25);
+    --orange: #ff8c42;
+    --orange-dim: rgba(255,140,66,0.1);
+    --red: #ff4d6a;
+    --red-dim: rgba(255,77,106,0.1);
+    --cyan: #00d4ff;
+    --cyan-dim: rgba(0,212,255,0.1);
+    --yellow: #ffd000;
+    --yellow-dim: rgba(255,208,0,0.1);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+
+  /* Hero background */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .hero-bg::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -20%;
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, rgba(0,230,138,0.08) 0%, transparent 60%);
+    animation: floatBlob 12s ease-in-out infinite;
+  }
+  .hero-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    right: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 60%);
+    animation: floatBlob 15s ease-in-out infinite reverse;
+  }
+  @keyframes floatBlob {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(30px,-20px) scale(1.05); }
+    66% { transform: translate(-20px,15px) scale(0.95); }
+  }
+
+  /* Grid pattern */
+  .grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,230,138,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,230,138,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 0;
+  }
+
+  /* Module card */
+  .module-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .module-card:hover {
+    background: var(--card-hover);
+    border-color: var(--border-light);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 30px var(--accent-dim);
+  }
+  .module-card:hover::before { opacity: 1; }
+
+  .module-card.expanded {
+    border-color: var(--accent);
+    box-shadow: 0 0 40px var(--accent-dim);
+  }
+
+  /* Icon containers */
+  .icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Status badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-core { background: var(--accent-dim); color: var(--accent); }
+  .badge-advanced { background: var(--cyan-dim); color: var(--cyan); }
+  .badge-upcoming { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-critical { background: var(--red-dim); color: var(--red); }
+
+  /* Category pills */
+  .cat-pill {
+    padding: 8px 20px;
+    border-radius: 30px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    white-space: nowrap;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .cat-pill:hover {
+    border-color: var(--border-light);
+    color: var(--fg);
+  }
+  .cat-pill.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
+
+  /* Feature tags inside cards */
+  .feat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.04);
+    color: var(--fg-muted);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  /* Expanded details */
+  .card-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.3s;
+    opacity: 0;
+  }
+  .card-details.open {
+    max-height: 600px;
+    opacity: 1;
+  }
+
+  /* Stats counter */
+  .stat-num {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 48px;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: particleFloat linear infinite;
+  }
+  @keyframes particleFloat {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+  }
+
+  /* Section reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Cityzen ID mockup */
+  .id-card {
+    background: linear-gradient(135deg, #1a2f25 0%, #0d1a14 100%);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 24px;
+    width: 320px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .id-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0,230,138,0.1), transparent 60%);
+  }
+  .id-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--cyan), var(--accent));
+  }
+
+  /* Pulse dot */
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+
+  /* Nav */
+  nav {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(10,15,13,0.8);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Search */
+  .search-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--fg);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.25s;
+    width: 100%;
+  }
+  .search-box::placeholder { color: var(--fg-muted); }
+  .search-box:focus { border-color: var(--accent); }
+
+  /* QR code mock */
+  .qr-mock {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(7,1fr);
+    grid-template-rows: repeat(7,1fr);
+    padding: 6px;
+    gap: 1px;
+  }
+  .qr-mock span {
+    border-radius: 1px;
+  }
+  .qr-mock .dark { background: #0a0f0d; }
+  .qr-mock .light { background: white; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px 24px;
+    color: var(--fg);
+    font-size: 14px;
+    z-index: 9999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Category section header */
+  .cat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cat-header .cat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .stat-num { font-size: 32px; }
+    .id-card { width: 280px; padding: 18px; }
+    .module-card { padding: 18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--accent);">
+        <i class="fa-solid fa-city" style="color:var(--bg);font-size:16px;"></i>
+      </div>
+      <span class="text-xl font-bold" style="font-family:'Outfit',sans-serif;">City<span style="color:var(--accent);">zen</span></span>
+    </div>
+    <div class="hidden md:flex items-center gap-6 text-sm" style="color:var(--fg-muted);">
+      <a href="#modules" class="hover:text-white transition-colors">Modules</a>
+      <a href="#id-card" class="hover:text-white transition-colors">ID Card</a>
+      <a href="#stats" class="hover:text-white transition-colors">Overview</a>
+      <button onclick="showToast('Export feature — coming soon!')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all" style="background:var(--accent);color:var(--bg);">
+        Get Started
+      </button>
+    </div>
+    <button class="md:hidden text-xl" style="color:var(--fg-muted);" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden px-4 pb-4 flex flex-col gap-3 text-sm" style="color:var(--fg-muted);">
+    <a href="#modules" class="py-2 border-b" style="border-color:var(--border);">Modules</a>
+    <a href="#id-card" class="py-2 border-b" style="border-color:var(--border);">ID Card</a>
+    <a href="#stats" class="py-2 border-b" style="border-color:var(--border);">Overview</a>
+    <button onclick="showToast('Export feature — coming soon!')" class="px-4 py-2 rounded-lg text-sm font-semibold" style="background:var(--accent);color:var(--bg);">Get Started</button>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<header class="relative min-h-screen flex items-center justify-center pt-20">
+  <div class="hero-bg"></div>
+  <div class="grid-pattern"></div>
+  <div id="particles" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <!-- Left: Text -->
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(0,230,138,0.2);">
+          <div class="pulse-dot"></div>
+          COMPLETE CITY ECOSYSTEM
+        </div>
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-900 leading-tight mb-6" style="font-family:'Outfit',sans-serif;">
+          Your City,<br>
+          <span style="background:linear-gradient(135deg,var(--accent),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Your App</span>
+        </h1>
+        <p class="text-lg mb-8 max-w-lg leading-relaxed" style="color:var(--fg-muted);">
+          Cityzen is a unified smart city platform with <strong style="color:var(--fg);">40+ modules</strong> — from digital ID cards and zero-cost local commerce to leader portals and civic services. Everything a city needs, one app.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href="#modules" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:scale-105" style="background:var(--accent);color:var(--bg);">
+            Explore All Modules <i class="fa-solid fa-arrow-down"></i>
+          </a>
+          <button onclick="showToast('Full spec document exported!')" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all hover:scale-105" style="border:1px solid var(--border-light);color:var(--fg);">
+            <i class="fa-solid fa-file-export"></i> Export Spec
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: ID Card Preview -->
+      <div class="flex justify-center" id="id-card">
+        <div class="id-card" id="idCardMock">
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-md flex items-center justify-center" style="background:var(--accent);">
+                  <i class="fa-solid fa-city" style="color:var(--bg);font-size:11px;"></i>
+                </div>
+                <span class="text-sm font-bold" style="font-family:'Outfit',sans-serif;">Cityzen</span>
+              </div>
+              <span class="text-xs font-mono" style="color:var(--fg-muted);">DIGITAL ID</span>
+            </div>
+
+            <div class="flex gap-4 mb-5">
+              <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0" style="background:var(--border);">
+                <img src="https://picsum.photos/seed/citizen42/128/128.jpg" alt="Citizen" class="w-full h-full object-cover">
+              </div>
+              <div>
+                <div class="font-bold text-lg leading-tight">Arjun Mehta</div>
+                <div class="text-xs mt-1" style="color:var(--fg-muted);">Male &bull; 28 yrs</div>
+                <div class="text-xs" style="color:var(--fg-muted);">Ward 14, Sector 7</div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs mb-5">
+              <div class="p-2 rounded-lg" style="background:rgba(0,0,0,0.3);">
+                <div style="color:var(--fg-muted);">ID Number</div>
+                <div class="font-mono font-bold mt-0.5" style="color:var(--accent);">CTZ-2025-00147852</div>
+              </div>
+              <div class="p-2 rounded-lg" style="background:rgba(0,0,0,0.3);">
+                <div style="color:var(--fg-muted);">Valid Until</div>
+                <div class="font-mono font-bold mt-0.5">2028-03-15</div>
+              </div>
+              <div class="p-2 rounded-lg" style="background:rgba(0,0,0,0.3);">
+                <div style="color:var(--fg-muted);">Blood Group</div>
+                <div class="font-bold mt-0.5" style="color:var(--red);">B+</div>
+              </div>
+              <div class="p-2 rounded-lg" style="background:rgba(0,0,0,0.3);">
+                <div style="color:var(--fg-muted);">Status</div>
+                <div class="font-bold mt-0.5" style="color:var(--accent);">Verified</div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <!-- QR mock -->
+              <div class="qr-mock" id="qrMock"></div>
+              <div class="text-right">
+                <div class="text-xs" style="color:var(--fg-muted);">Issued by</div>
+                <div class="text-sm font-semibold">Municipal Corp.</div>
+                <div class="text-xs mt-1" style="color:var(--fg-muted);">Scan to verify</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Stats Section -->
+<section id="stats" class="relative py-20">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 reveal">
+      <div class="text-center p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border);">
+        <div class="stat-num" data-target="42">0</div>
+        <div class="text-sm mt-2" style="color:var(--fg-muted);">Total Modules</div>
+      </div>
+      <div class="text-center p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border);">
+        <div class="stat-num" data-target="12">0</div>
+        <div class="text-sm mt-2" style="color:var(--fg-muted);">Categories</div>
+      </div>
+      <div class="text-center p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border);">
+        <div class="stat-num" data-target="8">0</div>
+        <div class="text-sm mt-2" style="color:var(--fg-muted);">Core Modules</div>
+      </div>
+      <div class="text-center p-6 rounded-2xl" style="background:var(--card);border:1px solid var(--border);">
+        <div class="stat-num" data-target="200">0</div>
+        <div class="text-sm mt-2" style="color:var(--fg-muted);">Features+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Filter + Modules Section -->
+<section id="modules" class="relative py-10 pb-32">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+
+    <div class="text-center mb-12 reveal">
+      <h2 class="text-3xl sm:text-4xl font-800 mb-3" style="font-family:'Outfit',sans-serif;">All Modules</h2>
+      <p class="text-base max-w-2xl mx-auto" style="color:var(--fg-muted);">Click any module to expand its full feature set. Use filters to browse by category or status.</p>
+    </div>
+
+    <!-- Search + Filters -->
+    <div class="mb-8 reveal">
+      <div class="flex flex-col sm:flex-row gap-4 mb-5">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2" style="color:var(--fg-muted);font-size:14px;"></i>
+          <input type="text" id="searchInput" class="search-box pl-10" placeholder="Search modules by name, feature, or keyword...">
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="cat-pill text-xs active" data-status="all" onclick="filterStatus(this,'all')">All</button>
+          <button class="cat-pill text-xs" data-status="core" onclick="filterStatus(this,'core')">Core</button>
+          <button class="cat-pill text-xs" data-status="advanced" onclick="filterStatus(this,'advanced')">Advanced</button>
+          <button class="cat-pill text-xs" data-status="upcoming" onclick="filterStatus(this,'upcoming')">Upcoming</button>
+        </div>
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-2" id="catPills" style="scrollbar-width:none;-ms-overflow-style:none;">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- Modules Container -->
+    <div id="modulesContainer" class="grid gap-4">
+      <!-- Generated by JS -->
+    </div>
+
+    <div id="noResults" class="hidden text-center py-20">
+      <i class="fa-solid fa-magnifying-glass text-4xl mb-4" style="color:var(--border-light);"></i>
+      <p class="text-lg" style="color:var(--fg-muted);">No modules match your search.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="relative py-12" style="border-top:1px solid var(--border);">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:var(--accent);">
+        <i class="fa-solid fa-city" style="color:var(--bg);font-size:14px;"></i>
+      </div>
+      <span class="font-bold" style="font-family:'Outfit',sans-serif;">Cityzen</span>
+      <span class="text-sm" style="color:var(--fg-muted);">&mdash; Smart City Platform</span>
+    </div>
+    <div class="text-sm" style="color:var(--fg-muted);">42 Modules &bull; 12 Categories &bull; One App</div>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div id="toast" class="toast">
+  <i class="fa-solid fa-circle-check" style="color:var(--accent);"></i>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ===== MODULE DATA =====
+const modules = [
+  // ── 1. IDENTITY & ACCESS ──
+  {
+    id: 1,
+    name: "Cityzen ID Card",
+    icon: "fa-solid fa-id-card",
+    color: "var(--accent)",
+    colorDim: "var(--accent-dim)",
+    category: "Identity & Access",
+    catIcon: "fa-solid fa-fingerprint",
+    catColor: "var(--accent)",
+    status: "core",
+    desc: "Digital identity card with a unique Cityzen ID number, QR verification, and government-grade authenticity.",
+    features: [
+      "Unique CTZ-YYYY-XXXXXXXX ID number",
+      "QR code for instant scan & verify",
+      "Photo, name, age, blood group, ward info",
+      "Validity period with auto-renewal reminder",
+      "Offline mode — works without internet",
+      "Tamper-proof digital signature",
+      "Link to Aadhaar / Voter ID (optional)",
+      "Multi-language name display"
+    ]
+  },
+  {
+    id: 2,
+    name: "Family & Dependent Linking",
+    icon: "fa-solid fa-people-roof",
+    color: "var(--accent)",
+    colorDim: "var(--accent-dim)",
+    category: "Identity & Access",
+    catIcon: "fa-solid fa-fingerprint",
+    catColor: "var(--accent)",
+    status: "core",
+    desc: "Link family members under one primary Cityzen account for shared services and benefits.",
+    features: [
+      "Add up to 6 dependents per account",
+      "Separate IDs for each member",
+      "Family benefit tracking (ration, subsidies)",
+      "Guardian mode for minor children",
+      "Quick switch between family profiles"
+    ]
+  },
+  {
+    id: 3,
+    name: "Document Vault",
+    icon: "fa-solid fa-vault",
+    color: "var(--accent)",
+    colorDim: "var(--accent-dim)",
+    category: "Identity & Access",
+    catIcon: "fa-solid fa-fingerprint",
+    catColor: "var(--accent)",
+    status: "advanced",
+    desc: "Secure digital locker for all personal documents — encrypted, accessible anytime.",
+    features: [
+      "Store Aadhaar, PAN, DL, passport scans",
+      "AES-256 encrypted storage",
+      "Share documents via time-limited links",
+      "Auto-fetch from DigiLocker (integration)",
+      "Document expiry alerts"
+    ]
+  },
+
+  // ── 2. LOCAL E-COMMERCE ──
+  {
+    id: 4,
+    name: "Cityzen Bazaar",
+    icon: "fa-solid fa-store",
+    color: "var(--orange)",
+    colorDim: "var(--orange-dim)",
+    category: "Local E-Commerce",
+    catIcon: "fa-solid fa-cart-shopping",
+    catColor: "var(--orange)",
+    status: "core",
+    desc: "Hyper-local marketplace where city residents buy from city sellers. Zero delivery cost — self-ship or self-pickup only.",
+    features: [
+      "Zero-cost delivery: Self-Pickup or Self-Ship",
+      "Seller shops within city boundary only",
+      "Product categories: groceries, clothes, electronics, food, handmade",
+      "Real-time seller inventory sync",
+      "In-app chat between buyer & seller",
+      "Pickup address auto-set from Cityzen profile",
+      "Order tracking for self-ship (seller delivers)",
+      "Ratings & reviews per seller & product",
+      "Seller verification via Cityzen ID",
+      "Daily deals & locality-specific promotions",
+      "Return/refund handled P2P (no warehouse)",
+      "Category filters by ward, sector, pin code"
+    ]
+  },
+  {
+    id: 5,
+    name: "Seller Dashboard",
+    icon: "fa-solid fa-chart-line",
+    color: "var(--orange)",
+    colorDim: "var(--orange-dim)",
+    category: "Local E-Commerce",
+    catIcon: "fa-solid fa-cart-shopping",
+    catColor: "var(--orange)",
+    status: "core",
+    desc: "Full shop management for local sellers — listings, orders, analytics, payouts.",
+    features: [
+      "Product listing with photos, price, stock",
+      "Order management: accept, pack, mark ready",
+      "Self-ship delivery assignment & route",
+      "Revenue dashboard & daily summary",
+      "Payout to bank account / UPI",
+      "Push notifications for new orders",
+      "Bulk upload via CSV",
+      "Shop holiday mode toggle"
+    ]
+  },
+  {
+    id: 6,
+    name: "Farm-to-City Direct",
+    icon: "fa-solid fa-tractor",
+    color: "var(--orange)",
+    colorDim: "var(--orange-dim)",
+    category: "Local E-Commerce",
+    catIcon: "fa-solid fa-cart-shopping",
+    catColor: "var(--orange)",
+    status: "advanced",
+    desc: "Connect peri-urban farmers directly with city consumers — fresh produce, no middlemen.",
+    features: [
+      "Farmer profiles with farm location & produce",
+      "Weekly harvest listing & pre-order",
+      "Cluster pickup points (ward-level)",
+      "Seasonal crop calendar",
+      "Fair price — no commission model",
+      "Organic / natural certification badges"
+    ]
+  },
+
+  // ── 3. GOVERNANCE & LEADERS ──
+  {
+    id: 7,
+    name: "Leader Portal (MP/MLA/Councillor)",
+    icon: "fa-solid fa-landmark-dome",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Governance & Leaders",
+    catIcon: "fa-solid fa-gavel",
+    catColor: "var(--cyan)",
+    status: "core",
+    desc: "Dedicated portal for elected representatives to connect with constituents, post updates, and manage their follower base via QR code scanning.",
+    features: [
+      "Leader profile: photo, designation, constituency",
+      "QR code-based member addition — scan to follow",
+      "Push notifications to all followers instantly",
+      "Post text, image, video updates (like social feed)",
+      "Event creation: rallies, meetings, camps",
+      "Poll & survey creation for constituency feedback",
+      "Member count & ward-wise breakdown analytics",
+      "Announcement pinning for urgent notices",
+      "Multi-level hierarchy: MLA → Councillor → Booth",
+      "Separate admin login for leader's team",
+      "Complaint escalation from public to leader",
+      "Achievement / development work gallery"
+    ]
+  },
+  {
+    id: 8,
+    name: "Grievance & Complaint Portal",
+    icon: "fa-solid fa-clipboard-check",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Governance & Leaders",
+    catIcon: "fa-solid fa-gavel",
+    catColor: "var(--cyan)",
+    status: "core",
+    desc: "File complaints to the right department with photo evidence, track status, get resolved.",
+    features: [
+      "Categorized: pothole, drainage, streetlight, water, garbage, noise",
+      "Auto-routed to concerned department",
+      "Photo + location (GPS) auto-attached",
+      "Ticket number & real-time status tracking",
+      "Escalation matrix: department → officer → leader",
+      "Public scoreboard: resolved vs pending per ward",
+      "Citizen satisfaction rating after resolution",
+      "Anonymous complaint option"
+    ]
+  },
+  {
+    id: 9,
+    name: "Public Polls & Referendums",
+    icon: "fa-solid fa-square-poll-vertical",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Governance & Leaders",
+    catIcon: "fa-solid fa-gavel",
+    catColor: "var(--cyan)",
+    status: "advanced",
+    desc: "City-wide or ward-level polling on development decisions, budget priorities, policy choices.",
+    features: [
+      "One-Cityzen-one-vote (ID-verified)",
+      "Time-bound polls with countdown",
+      "Real-time result visualization",
+      "Ward-wise breakdown",
+      "Option to add rationale/comments",
+      "Results shared with administration"
+    ]
+  },
+  {
+    id: 10,
+    name: "RTI Filing Assistant",
+    icon: "fa-solid fa-file-circle-question",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Governance & Leaders",
+    catIcon: "fa-solid fa-gavel",
+    catColor: "var(--cyan)",
+    status: "upcoming",
+    desc: "Draft and file Right to Information requests directly through the app with templates.",
+    features: [
+      "Pre-built RTI templates by department",
+      "Auto-fill applicant details from Cityzen ID",
+      "Department selector with correct addressing",
+      "Fee payment integration (₹10)",
+      "Tracking & response deadline alerts",
+      "First appeal filing if denied"
+    ]
+  },
+
+  // ── 4. CIVIC SERVICES ──
+  {
+    id: 11,
+    name: "Utility Bill Payments",
+    icon: "fa-solid fa-bolt",
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
+    category: "Civic Services",
+    catIcon: "fa-solid fa-building-columns",
+    catColor: "var(--yellow)",
+    status: "core",
+    desc: "Pay electricity, water, gas, property tax, and other municipal bills in one place.",
+    features: [
+      "Electricity bill (discom-integrated)",
+      "Water supply bill",
+      "Property tax calculation & payment",
+      "LPG gas booking & payment",
+      "Auto-pay setup with reminders",
+      "Payment history & downloadable receipts",
+      "UPI, cards, net banking, wallet"
+    ]
+  },
+  {
+    id: 12,
+    name: "Certificate Services",
+    icon: "fa-solid fa-certificate",
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
+    category: "Civic Services",
+    catIcon: "fa-solid fa-building-columns",
+    catColor: "var(--yellow)",
+    status: "core",
+    desc: "Apply for birth/death certificates, income certificates, caste certificates, domicile — all digitally.",
+    features: [
+      "Birth & death certificate application",
+      "Income certificate",
+      "Caste / tribe certificate",
+      "Domicile / residence certificate",
+      "Auto-fill from Cityzen ID data",
+      "Application tracking with status updates",
+      "Digital certificate delivery to Document Vault",
+      "Appointment booking for physical verification"
+    ]
+  },
+  {
+    id: 13,
+    name: "Waste & Sanitation",
+    icon: "fa-solid fa-recycle",
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
+    category: "Civic Services",
+    catIcon: "fa-solid fa-building-columns",
+    catColor: "var(--yellow)",
+    status: "advanced",
+    desc: "Garbage collection scheduling, segregation tracking, bulk waste pickup requests.",
+    features: [
+      "Daily/alternate day pickup schedule",
+      "Track if your area was serviced today",
+      "Request bulk waste pickup (furniture, construction)",
+      "Compost / recycling center locator",
+      "Segregation compliance score per household",
+      "Report missed pickup with one tap",
+      "Dry/wet waste segregation reminders"
+    ]
+  },
+  {
+    id: 14,
+    name: "Property & Registration",
+    icon: "fa-solid fa-house-chimney",
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
+    category: "Civic Services",
+    catIcon: "fa-solid fa-building-columns",
+    catColor: "var(--yellow)",
+    status: "advanced",
+    desc: "Property search, registration status, mutation tracking, and rental agreement templates.",
+    features: [
+      "Property search by ID / address / owner",
+      "Registration application status",
+      "Mutation (name transfer) tracking",
+      "Rental agreement template generator",
+      "Property tax receipt download",
+      "Encumbrance certificate request"
+    ]
+  },
+
+  // ── 5. EMERGENCY & SAFETY ──
+  {
+    id: 15,
+    name: "SOS Emergency Button",
+    icon: "fa-solid fa-triangle-exclamation",
+    color: "var(--red)",
+    colorDim: "var(--red-dim)",
+    category: "Emergency & Safety",
+    catIcon: "fa-solid fa-shield-halved",
+    catColor: "var(--red)",
+    status: "core",
+    desc: "One-tap emergency alert that shares live location and contacts emergency services.",
+    features: [
+      "Single-tap SOS on home screen & lock screen widget",
+      "Auto-sends GPS location to emergency contacts",
+      "Calls 112 (integrated)",
+      "Records 30-second audio automatically",
+      "Sends alert to nearest police station",
+      "Shake-to-trigger option",
+      "Fake-call mode for discreet situations"
+    ]
+  },
+  {
+    id: 16,
+    name: "Nearby Emergency Services",
+    icon: "fa-solid fa-hospital",
+    color: "var(--red)",
+    colorDim: "var(--red-dim)",
+    category: "Emergency & Safety",
+    catIcon: "fa-solid fa-shield-halved",
+    catColor: "var(--red)",
+    status: "core",
+    desc: "Instantly locate hospitals, police stations, fire stations, blood banks near you.",
+    features: [
+      "Hospital finder with distance & directions",
+      "Police station & chowki locator",
+      "Fire station finder",
+      "Blood bank with real-time stock availability",
+      "Ambulance booking (partner integrations)",
+      "24/7 helpline numbers directory",
+      "Women helpline, child helpline quick-dial"
+    ]
+  },
+  {
+    id: 17,
+    name: "Disaster Alert System",
+    icon: "fa-solid fa-tower-broadcast",
+    color: "var(--red)",
+    colorDim: "var(--red-dim)",
+    category: "Emergency & Safety",
+    catIcon: "fa-solid fa-shield-halved",
+    catColor: "var(--red)",
+    status: "core",
+    desc: "City administration can push real-time alerts for floods, cyclones, earthquakes, riots.",
+    features: [
+      "Push notification with siren sound override",
+      "Severity levels: advisory, warning, emergency",
+      "Evacuation route maps",
+      "Shelter location display",
+      "Multi-language alert support",
+      "Cannot be muted during active emergency"
+    ]
+  },
+  {
+    id: 18,
+    name: "Crime Map & Safety Score",
+    icon: "fa-solid fa-map-location-dot",
+    color: "var(--red)",
+    colorDim: "var(--red-dim)",
+    category: "Emergency & Safety",
+    catIcon: "fa-solid fa-shield-halved",
+    catColor: "var(--red)",
+    status: "advanced",
+    desc: "View crime hotspots, safety scores for areas, and recent incidents (anonymized).",
+    features: [
+      "Heatmap of reported incidents (last 30 days)",
+      "Area safety score (1-10)",
+      "Anonymous incident reporting",
+      "Safe route suggestion for late-night travel",
+      "Trend analysis: increasing/decreasing crime"
+    ]
+  },
+
+  // ── 6. TRANSPORT & MOBILITY ──
+  {
+    id: 19,
+    name: "City Bus Tracker",
+    icon: "fa-solid fa-bus",
+    color: "#a78bfa",
+    colorDim: "rgba(167,139,250,0.1)",
+    category: "Transport & Mobility",
+    catIcon: "fa-solid fa-route",
+    catColor: "#a78bfa",
+    status: "core",
+    desc: "Live bus tracking, route planning, pass purchase — everything for city bus commuters.",
+    features: [
+      "Live bus location on map",
+      "ETA at your stop",
+      "Route search with transfers",
+      "Digital bus pass (daily/weekly/monthly)",
+      "Crowd level indicator (empty/moderate/full)",
+      "Favorite routes & stops",
+      "Timetable for all routes"
+    ]
+  },
+  {
+    id: 20,
+    name: "Smart Parking",
+    icon: "fa-solid fa-square-parking",
+    color: "#a78bfa",
+    colorDim: "rgba(167,139,250,0.1)",
+    category: "Transport & Mobility",
+    catIcon: "fa-solid fa-route",
+    catColor: "#a78bfa",
+    status: "advanced",
+    desc: "Find available parking slots in real-time, pre-book, and pay digitally.",
+    features: [
+      "Real-time slot availability map",
+      "Pre-booking for time slots",
+      "Digital payment (hourly rates)",
+      "Timer & extension from app",
+      "Navigation to booked slot",
+      "Monthly pass for regular parkers"
+    ]
+  },
+  {
+    id: 21,
+    name: "EV Charging Finder",
+    icon: "fa-solid fa-charging-station",
+    color: "#a78bfa",
+    colorDim: "rgba(167,139,250,0.1)",
+    category: "Transport & Mobility",
+    catIcon: "fa-solid fa-route",
+    catColor: "#a78bfa",
+    status: "upcoming",
+    desc: "Locate EV charging stations, check availability, and start/stop charging sessions.",
+    features: [
+      "Charging station map with connector types",
+      "Live availability of chargers",
+      "Start/stop charging from app",
+      "Payment per kWh",
+      "Session history & invoices",
+      "Route planning with charging stops"
+    ]
+  },
+  {
+    id: 22,
+    name: "Traffic & Road Conditions",
+    icon: "fa-solid fa-traffic-light",
+    color: "#a78bfa",
+    colorDim: "rgba(167,139,250,0.1)",
+    category: "Transport & Mobility",
+    catIcon: "fa-solid fa-route",
+    catColor: "#a78bfa",
+    status: "advanced",
+    desc: "Live traffic updates, road closures, diversions, and congestion heatmap.",
+    features: [
+      "Live traffic congestion map",
+      "Road closure & diversion alerts",
+      "User-reported jams & hazards",
+      "Estimated travel time on major routes",
+      "Signal timing display at key junctions"
+    ]
+  },
+
+  // ── 7. HEALTH & WELLNESS ──
+  {
+    id: 23,
+    name: "Health Profile & Records",
+    icon: "fa-solid fa-heart-pulse",
+    color: "#f472b6",
+    colorDim: "rgba(244,114,182,0.1)",
+    category: "Health & Wellness",
+    catIcon: "fa-solid fa-staff-snake",
+    catColor: "#f472b6",
+    status: "core",
+    desc: "Personal health dashboard with medical history, vaccinations, allergies, and prescriptions.",
+    features: [
+      "Blood group, allergies, chronic conditions",
+      "Vaccination record (COVID, Hepatitis, etc.)",
+      "Prescription upload & history",
+      "ABHA ID integration",
+      "Emergency medical info on ID card",
+      "Doctor visit history log"
+    ]
+  },
+  {
+    id: 24,
+    name: "Hospital & Doctor Directory",
+    icon: "fa-solid fa-stethoscope",
+    color: "#f472b6",
+    colorDim: "rgba(244,114,182,0.1)",
+    category: "Health & Wellness",
+    catIcon: "fa-solid fa-staff-snake",
+    catColor: "#f472b6",
+    status: "core",
+    desc: "Complete directory of city hospitals, clinics, doctors with booking capability.",
+    features: [
+      "Hospital list with specialties, beds, ratings",
+      "Doctor profiles: qualification, experience, fees",
+      "Online appointment booking",
+      "OPD queue status (live token number)",
+      "Lab test booking with home collection",
+      "Pharmacy locator & medicine ordering"
+    ]
+  },
+  {
+    id: 25,
+    name: "Blood Bank Connect",
+    icon: "fa-solid fa-droplet",
+    color: "#f472b6",
+    colorDim: "rgba(244,114,182,0.1)",
+    category: "Health & Wellness",
+    catIcon: "fa-solid fa-staff-snake",
+    catColor: "#f472b6",
+    status: "core",
+    desc: "Real-time blood availability across city blood banks + donor registration.",
+    features: [
+      "Live blood group stock in all city blood banks",
+      "Blood type filter & nearest bank",
+      "Donor registration with Cityzen ID",
+      "Blood request posting (for patients)",
+      "Donor match notification",
+      "Blood donation camp schedule & registration"
+    ]
+  },
+  {
+    id: 26,
+    name: "Mental Health & Helpline",
+    icon: "fa-solid fa-brain",
+    color: "#f472b6",
+    colorDim: "rgba(244,114,182,0.1)",
+    category: "Health & Wellness",
+    catIcon: "fa-solid fa-staff-snake",
+    catColor: "#f472b6",
+    status: "upcoming",
+    desc: "Access to counselors, crisis helplines, self-assessment tools, and wellness content.",
+    features: [
+      "24/7 crisis helpline quick-dial",
+      "Self-assessment questionnaires (PHQ-9, GAD-7)",
+      "Book counseling sessions",
+      "Anonymous support group forums",
+      "Meditation & breathing exercises",
+      "Local NGO counselor directory"
+    ]
+  },
+
+  // ── 8. COMMUNITY & SOCIAL ──
+  {
+    id: 27,
+    name: "City Feed",
+    icon: "fa-solid fa-newspaper",
+    color: "var(--accent)",
+    colorDim: "var(--accent-dim)",
+    category: "Community & Social",
+    catIcon: "fa-solid fa-users",
+    catColor: "var(--accent)",
+    status: "core",
+    desc: "Hyper-local social feed — posts, announcements, events from your ward and city.",
+    features: [
+      "Posts sorted by: city, ward, locality",
+      "Text, photo, video posts",
+      "Upvote / downvote (Reddit-style)",
+      "Verified badge for officials & leaders",
+      "Trending topics in your area",
+      "Report inappropriate content",
+      "Share to external platforms"
+    ]
+  },
+  {
+    id: 28,
+    name: "Lost & Found",
+    icon: "fa-solid fa-magnifying-glass-location",
+    color: "var(--accent)",
+    colorDim: "var(--accent-dim)",
+    category: "Community & Social",
+    catIcon: "fa-solid fa-users",
+    catColor: "var(--accent)",
+    status: "core",
+    desc: "Report lost or found items with location, photo, and contact — city-wide matching.",
+    features: [
+      "Post lost item: description, photo, last seen location",
+      "Post found item: description, photo, found location",
+      "Auto-match suggestions (category + area)",
+      "Direct messaging between poster & finder",
+      "Category filters: documents, pets, electronics, keys",
+      "Claim verification process"
+    ]
+  },
+  {
+    id: 29,
+    name: "Local Job Board",
+    icon: "fa-solid fa-briefcase",
+    color: "var(--accent)",
+    colorDim: "var(--accent-dim)",
+    category: "Community & Social",
+    catIcon: "fa-solid fa-users",
+    catColor: "var(--accent)",
+    status: "advanced",
+    desc: "City-first job board — local businesses, part-time, gig work, internships.",
+    features: [
+      "Post jobs (free for local businesses)",
+      "Filter by ward, sector, job type",
+      "Categories: retail, delivery, tutoring, security, hospitality",
+      "Apply with Cityzen profile (no resume needed for basic)",
+      "Gig / task-based quick jobs",
+      "Employer ratings from workers"
+    ]
+  },
+  {
+    id: 30,
+    name: "Volunteer & NGO Hub",
+    icon: "fa-solid fa-hand-holding-heart",
+    color: "var(--accent)",
+    colorDim: "var(--accent-dim)",
+    category: "Community & Social",
+    catIcon: "fa-solid fa-users",
+    catColor: "var(--accent)",
+    status: "advanced",
+    desc: "Discover volunteering opportunities, NGO events, donation drives in your city.",
+    features: [
+      "NGO directory with causes & verification",
+      "Event calendar: cleanups, tree planting, food drives",
+      "Volunteer hours tracking & certificates",
+      "In-app donation to verified NGOs",
+      "Skill-based volunteering match",
+      "Impact dashboard: hours contributed, people helped"
+    ]
+  },
+
+  // ── 9. UTILITIES & PAYMENTS ──
+  {
+    id: 31,
+    name: "Cityzen Wallet",
+    icon: "fa-solid fa-wallet",
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
+    category: "Utilities & Payments",
+    catIcon: "fa-solid fa-coins",
+    catColor: "var(--yellow)",
+    status: "core",
+    desc: "In-app digital wallet for seamless payments across all Cityzen services.",
+    features: [
+      "Add money via UPI, cards, net banking",
+      "Pay for Bazaar orders, bus pass, parking",
+      "Send money to other Cityzens",
+      "Transaction history & statements",
+      "Cashback & reward points",
+      "Auto-topup setting",
+      "Refund wallet for Bazaar returns"
+    ]
+  },
+  {
+    id: 32,
+    name: "Ration & Subsidy Tracker",
+    icon: "fa-solid fa-hand-holding-medical",
+    color: "var(--yellow)",
+    colorDim: "var(--yellow-dim)",
+    category: "Utilities & Payments",
+    catIcon: "fa-solid fa-coins",
+    catColor: "var(--yellow)",
+    status: "advanced",
+    desc: "Track PDS ration entitlements, subsidy status, and fair price shop availability.",
+    features: [
+      "Ration card details & family members linked",
+      "Monthly entitlement: wheat, rice, sugar, kerosene",
+      "FPS (Fair Price Shop) locator & stock status",
+      "Lifting history: what was taken, when",
+      "Subsidy amount calculation",
+      "Complaint against FPS"
+    ]
+  },
+
+  // ── 10. SMART CITY FEATURES ──
+  {
+    id: 33,
+    name: "Air Quality & Weather",
+    icon: "fa-solid fa-wind",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Smart City",
+    catIcon: "fa-solid fa-microchip",
+    catColor: "var(--cyan)",
+    status: "core",
+    desc: "Real-time AQI, weather, temperature, humidity — with health advisories.",
+    features: [
+      "Live AQI with station-level data",
+      "7-day weather forecast",
+      "Health advisory based on AQI (sensitive groups)",
+      "Rainfall alert & flood risk indicator",
+      "Temperature feels-like & UV index",
+      "Widget for home screen"
+    ]
+  },
+  {
+    id: 34,
+    name: "Public WiFi Hotspots",
+    icon: "fa-solid fa-wifi",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Smart City",
+    catIcon: "fa-solid fa-microchip",
+    catColor: "var(--cyan)",
+    status: "advanced",
+    desc: "Discover and auto-connect to city-owned free WiFi zones.",
+    features: [
+      "Hotspot map with signal strength",
+      "One-tap connect (Cityzen ID auth)",
+      "Session timer & data usage",
+      "Hotspot rating & speed test",
+      "Offline hotspot list download"
+    ]
+  },
+  {
+    id: 35,
+    name: "Water Level & Supply Status",
+    icon: "fa-solid fa-faucet-drip",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Smart City",
+    catIcon: "fa-solid fa-microchip",
+    catColor: "var(--cyan)",
+    status: "advanced",
+    desc: "Check reservoir levels, water supply schedule, and report supply disruptions.",
+    features: [
+      "City reservoir level (live %)",
+      "Area-wise supply schedule (day/time)",
+      "Supply disruption alerts",
+      "Water quality test results (TDS, chlorine)",
+      "Report low pressure / no supply",
+      "Tanker request for emergency supply"
+    ]
+  },
+  {
+    id: 36,
+    name: "Smart Streetlight Reporting",
+    icon: "fa-solid fa-lightbulb",
+    color: "var(--cyan)",
+    colorDim: "var(--cyan-dim)",
+    category: "Smart City",
+    catIcon: "fa-solid fa-microchip",
+    catColor: "var(--cyan)",
+    status: "upcoming",
+    desc: "Report non-functional streetlights with GPS — track repair progress.",
+    features: [
+      "One-tap report with auto GPS",
+      "Photo attachment",
+      "Ticket tracking",
+      "Repair SLA: 48 hours",
+      "Dark spot heatmap for city planning"
+    ]
+  },
+
+  // ── 11. ENTERTAINMENT & CULTURE ──
+  {
+    id: 37,
+    name: "City Events Calendar",
+    icon: "fa-solid fa-calendar-days",
+    color: "var(--orange)",
+    colorDim: "var(--orange-dim)",
+    category: "Entertainment & Culture",
+    catIcon: "fa-solid fa-masks-theater",
+    catColor: "var(--orange)",
+    status: "core",
+    desc: "Discover everything happening in your city — festivals, concerts, exhibitions, sports.",
+    features: [
+      "Event listing by date, category, area",
+      "Free & paid events",
+      "Event registration / ticket booking",
+      "Add to personal calendar",
+      "Reminder notifications",
+      "Event organizer profiles",
+      "Post-event photo gallery"
+    ]
+  },
+  {
+    id: 38,
+    name: "City Guide & Tourism",
+    icon: "fa-solid fa-map-pin",
+    color: "var(--orange)",
+    colorDim: "var(--orange-dim)",
+    category: "Entertainment & Culture",
+    catIcon: "fa-solid fa-masks-theater",
+    catColor: "var(--orange)",
+    status: "advanced",
+    desc: "Curated city guide for tourists and new residents — landmarks, food trails, heritage walks.",
+    features: [
+      "Points of interest: monuments, parks, museums",
+      "Audio guide for heritage sites",
+      "Food trail maps (street food, restaurants)",
+      "Self-guided walking/cycling routes",
+      "Photo spots with best time suggestions",
+      "Tourist helpline"
+    ]
+  },
+  {
+    id: 39,
+    name: "Sports & Recreation Booking",
+    icon: "fa-solid fa-futbol",
+    color: "var(--orange)",
+    colorDim: "var(--orange-dim)",
+    category: "Entertainment & Culture",
+    catIcon: "fa-solid fa-masks-theater",
+    catColor: "var(--orange)",
+    status: "upcoming",
+    desc: "Book municipal sports grounds, swimming pools, community halls, and libraries.",
+    features: [
+      "Ground / court availability calendar",
+      "Online slot booking & payment",
+      "Swimming pool session booking",
+      "Community hall booking for events",
+      "Library membership & book catalog",
+      "Coaching camp registrations"
+    ]
+  },
+
+  // ── 12. SPECIAL SERVICES ──
+  {
+    id: 40,
+    name: "Senior Citizen Care",
+    icon: "fa-solid fa-person-cane",
+    color: "#f472b6",
+    colorDim: "rgba(244,114,182,0.1)",
+    category: "Special Services",
+    catIcon: "fa-solid fa-hand-holding-heart",
+    catColor: "#f472b6",
+    status: "core",
+    desc: "Dedicated features for elderly: health reminders, helper connect, simplified UI mode.",
+    features: [
+      "Simplified 'Easy Mode' UI (larger text, fewer buttons)",
+      "Medicine reminder with alarm",
+      "One-tap call to family / doctor",
+      "Request helper for errands (volunteer network)",
+      "Pension status tracking",
+      "Fall detection alert (with compatible wearables)",
+      "Monthly health checkup reminders"
+    ]
+  },
+  {
+    id: 41,
+    name: "Pet Services",
+    icon: "fa-solid fa-paw",
+    color: "#f472b6",
+    colorDim: "rgba(244,114,182,0.1)",
+    category: "Special Services",
+    catIcon: "fa-solid fa-hand-holding-heart",
+    catColor: "#f472b6",
+    status: "upcoming",
+    desc: "Pet registration, vet finder, vaccination tracker, lost pet alerts.",
+    features: [
+      "Pet registration with Cityzen ID link",
+      "Pet ID card with QR (collar tag)",
+      "Vet clinic directory & booking",
+      "Vaccination schedule & reminders",
+      "Lost pet alert broadcast to nearby Cityzens",
+      "Pet adoption listing from shelters",
+      "Pet-friendly places map"
+    ]
+  },
+  {
+    id: 42,
+    name: "Accessibility Suite",
+    icon: "fa-solid fa-universal-access",
+    color: "#f472b6",
+    colorDim: "rgba(244,114,182,0.1)",
+    category: "Special Services",
+    catIcon: "fa-solid fa-hand-holding-heart",
+    catColor: "#f472b6",
+    status: "core",
+    desc: "Full accessibility: screen reader support, high contrast, voice navigation, wheelchair routes.",
+    features: [
+      "Screen reader optimized (TalkBack/VoiceOver)",
+      "High contrast & large text mode",
+      "Voice command navigation",
+      "Wheelchair-accessible route mapping",
+      "Disability certificate digital copy",
+      "Special parking spot locator",
+      "Hearing-impaired: visual alerts instead of audio"
+    ]
+  }
+];
+
+// ===== CATEGORY LIST =====
+const categories = [...new Set(modules.map(m => m.category))];
+
+// ===== STATE =====
+let activeCategory = "All";
+let activeStatus = "all";
+let searchQuery = "";
+
+// ===== INIT =====
+document.addEventListener("DOMContentLoaded", () => {
+  generateQR();
+  generateParticles();
+  renderCategoryPills();
+  renderModules();
+  setupSearch();
+  setupScrollReveal();
+  animateCounters();
+});
+
+// ===== QR CODE MOCK =====
+function generateQR() {
+  const qr = document.getElementById("qrMock");
+  // Generate a simple pattern
+  const pattern = [
+    1,1,1,0,1,1,1,
+    1,0,1,1,1,0,1,
+    1,1,1,0,1,1,1,
+    0,1,0,1,0,1,0,
+    1,1,1,0,1,1,1,
+    1,0,1,0,1,0,1,
+    1,1,1,0,1,1,1
+  ];
+  pattern.forEach(p => {
+    const span = document.createElement("span");
+    span.className = p ? "dark" : "light";
+    qr.appendChild(span);
+  });
+}
+
+// ===== PARTICLES =====
+function generateParticles() {
+  const container = document.getElementById("particles");
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    p.style.left = Math.random() * 100 + "%";
+    p.style.top = (60 + Math.random() * 40) + "%";
+    p.style.animationDuration = (8 + Math.random() * 12) + "s";
+    p.style.animationDelay = Math.random() * 10 + "s";
+    p.style.width = (2 + Math.random() * 3) + "px";
+    p.style.height = p.style.width;
+    container.appendChild(p);
+  }
+}
+
+// ===== CATEGORY PILLS =====
+function renderCategoryPills() {
+  const container = document.getElementById("catPills");
+  const allPill = document.createElement("button");
+  allPill.className = "cat-pill active";
+  allPill.textContent = "All";
+  allPill.onclick = () => filterCategory(allPill, "All");
+  container.appendChild(allPill);
+
+  categories.forEach(cat => {
+    const pill = document.createElement("button");
+    pill.className = "cat-pill";
+    pill.textContent = cat;
+    pill.onclick = () => filterCategory(pill, cat);
+    container.appendChild(pill);
+  });
+}
+
+function filterCategory(el, cat) {
+  document.querySelectorAll("#catPills .cat-pill").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  activeCategory = cat;
+  renderModules();
+}
+
+function filterStatus(el, status) {
+  document.querySelectorAll("[data-status]").forEach(p => p.classList.remove("active"));
+  el.classList.add("active");
+  activeStatus = status;
+  renderModules();
+}
+
+// ===== SEARCH =====
+function setupSearch() {
+  const input = document.getElementById("searchInput");
+  let debounce;
+  input.addEventListener("input", () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      searchQuery = input.value.toLowerCase().trim();
+      renderModules();
+    }, 200);
+  });
+}
+
+// ===== RENDER MODULES =====
+function renderModules() {
+  const container = document.getElementById("modulesContainer");
+  const noResults = document.getElementById("noResults");
+  container.innerHTML = "";
+
+  let filtered = modules;
+
+  // Category filter
+  if (activeCategory !== "All") {
+    filtered = filtered.filter(m => m.category === activeCategory);
+  }
+
+  // Status filter
+  if (activeStatus !== "all") {
+    filtered = filtered.filter(m => m.status === activeStatus);
+  }
+
+  // Search filter
+  if (searchQuery) {
+    filtered = filtered.filter(m =>
+      m.name.toLowerCase().includes(searchQuery) ||
+      m.desc.toLowerCase().includes(searchQuery) ||
+      m.category.toLowerCase().includes(searchQuery) ||
+      m.features.some(f => f.toLowerCase().includes(searchQuery))
+    );
+  }
+
+  if (filtered.length === 0) {
+    noResults.classList.remove("hidden");
+    return;
+  }
+  noResults.classList.add("hidden");
+
+  // Group by category
+  const grouped = {};
+  filtered.forEach(m => {
+    if (!grouped[m.category]) grouped[m.category] = [];
+    grouped[m.category].push(m);
+  });
+
+  Object.entries(grouped).forEach(([cat, mods]) => {
+    const section = document.createElement("div");
+    section.className = "mb-10 reveal visible";
+
+    // Category header
+    const header = document.createElement("div");
+    header.className = "cat-header";
+    const catData = mods[0];
+    header.innerHTML = `
+      <div class="cat-icon" style="background:${catData.catColor}20;color:${catData.catColor};">
+        <i class="${catData.catIcon}"></i>
+      </div>
+      <h3 class="text-lg font-bold" style="font-family:'Outfit',sans-serif;">${cat}</h3>
+      <span class="text-xs ml-auto" style="color:var(--fg-muted);">${mods.length} module${mods.length > 1 ? 's' : ''}</span>
+    `;
+    section.appendChild(header);
+
+    // Module cards
+    const grid = document.createElement("div");
+    grid.className = "grid gap-4";
+
+    mods.forEach(m => {
+      const card = document.createElement("div");
+      card.className = "module-card";
+      card.setAttribute("data-id", m.id);
+      card.onclick = () => toggleCard(card);
+
+      const statusClass = m.status === "core" ? "badge-core" : m.status === "advanced" ? "badge-advanced" : m.status === "upcoming" ? "badge-upcoming" : "badge-critical";
+      const statusLabel = m.status.charAt(0).toUpperCase() + m.status.slice(1);
+
+      card.innerHTML = `
+        <div class="flex items-start gap-4">
+          <div class="icon-box" style="background:${m.colorDim};color:${m.color};">
+            <i class="${m.icon}"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <h4 class="font-bold text-base">${m.name}</h4>
+              <span class="badge ${statusClass}">${statusLabel}</span>
+            </div>
+            <p class="text-sm leading-relaxed" style="color:var(--fg-muted);">${m.desc}</p>
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              ${m.features.slice(0, 3).map(f => `<span class="feat-tag"><i class="fa-solid fa-check" style="color:${m.color};font-size:9px;"></i> ${f.length > 40 ? f.slice(0,40)+'...' : f}</span>`).join('')}
+              ${m.features.length > 3 ? `<span class="feat-tag" style="color:${m.color};">+${m.features.length - 3} more</span>` : ''}
+            </div>
+          </div>
+          <div class="flex-shrink-0 mt-1 transition-transform" style="color:var(--fg-muted);">
+            <i class="fa-solid fa-chevron-down text-sm"></i>
+          </div>
+        </div>
+        <div class="card-details">
+          <div class="mt-5 pt-4" style="border-top:1px solid var(--border);">
+            <div class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:var(--fg-muted);">All Features</div>
+            <div class="grid sm:grid-cols-2 gap-2">
+              ${m.features.map(f => `
+                <div class="flex items-start gap-2 text-sm">
+                  <i class="fa-solid fa-circle-check mt-0.5 flex-shrink-0" style="color:${m.color};font-size:12px;"></i>
+                  <span style="color:var(--fg);opacity:0.85;">${f}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    container.appendChild(section);
+  });
+}
+
+// ===== TOGGLE CARD =====
+function toggleCard(card) {
+  const details = card.querySelector(".card-details");
+  const chevron = card.querySelector(".fa-chevron-down");
+  const isOpen = details.classList.contains("open");
+
+  // Close all other cards
+  document.querySelectorAll(".module-card.expanded").forEach(c => {
+    if (c !== card) {
+      c.classList.remove("expanded");
+      c.querySelector(".card-details").classList.remove("open");
+      c.querySelector(".fa-chevron-down").style.transform = "rotate(0deg)";
+    }
+  });
+
+  if (isOpen) {
+    details.classList.remove("open");
+    card.classList.remove("expanded");
+    chevron.style.transform = "rotate(0deg)";
+  } else {
+    details.classList.add("open");
+    card.classList.add("expanded");
+    chevron.style.transform = "rotate(180deg)";
+  }
+}
+
+// ===== SCROLL REVEAL =====
+function setupScrollReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+}
+
+// ===== COUNTER ANIMATION =====
+function animateCounters() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target);
+        let current = 0;
+        const step = Math.max(1, Math.floor(target / 40));
+        const interval = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(interval);
+          }
+          el.textContent = current + (target >= 100 ? "+" : "");
+        }, 30);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll(".stat-num").forEach(el => observer.observe(el));
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  const toastMsg = document.getElementById("toastMsg");
+  toastMsg.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+// ===== SMOOTH SCROLL =====
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener("click", e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute("href"));
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      // Close mobile menu
+      document.getElementById("mobileMenu").classList.add("hidden");
+    }
+  });
+});
+</script>
+</body>
+</html>
