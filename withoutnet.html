@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Aether — The Offline City Lifeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14;
+    --bg-2:#0f1620;
+    --panel:#131c28;
+    --panel-2:#1a2535;
+    --border:#233044;
+    --text:#e6edf6;
+    --muted:#8a98ad;
+    --accent:#00e5ff;
+    --accent-2:#4fc3f7;
+    --warn:#ffb74d;
+    --danger:#ff5c6c;
+    --ok:#4ade80;
+    --signal:#7c4dff;
+    --gold:#fbbf24;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Space Grotesk',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,229,255,0.03) 1px,transparent 1px);
+    background-size:32px 32px;pointer-events:none;z-index:0;
+  }
+  body::after{
+    content:'';position:fixed;inset:0;
+    background:radial-gradient(ellipse at 10% 10%,rgba(0,229,255,0.08),transparent 50%),
+               radial-gradient(ellipse at 90% 90%,rgba(124,77,255,0.08),transparent 50%);
+    pointer-events:none;z-index:0;
+  }
+  .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:100;background:rgba(10,14,20,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;max-width:1180px;margin:0 auto}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-0.02em}
+  .logo-dot{width:10px;height:10px;background:var(--ok);border-radius:50%;box-shadow:0 0 12px var(--ok);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+  .nav-links{display:flex;gap:6px;flex-wrap:wrap}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:6px;transition:all .2s;font-family:'JetBrains Mono',monospace}
+  .nav-links a:hover{color:var(--accent);background:rgba(0,229,255,0.08)}
+
+  /* HERO */
+  header.hero{padding:100px 0 80px;position:relative}
+  .badge{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ok);background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.25);padding:6px 14px;border-radius:100px;margin-bottom:24px}
+  .badge::before{content:'';width:6px;height:6px;background:var(--ok);border-radius:50%;box-shadow:0 0 8px var(--ok)}
+  h1{font-size:clamp(40px,7vw,76px);font-weight:700;line-height:1.05;letter-spacing:-0.03em;margin-bottom:24px}
+  h1 .glow{background:linear-gradient(135deg,var(--ok),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p.lead{font-size:20px;color:var(--muted);max-width:720px;margin-bottom:40px}
+  .hero-stats{display:flex;gap:50px;flex-wrap:wrap}
+  .stat{font-family:'JetBrains Mono',monospace}
+  .stat .v{font-size:32px;font-weight:700;color:var(--ok);display:block}
+  .stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em}
+
+  /* SECTIONS */
+  section{padding:80px 0;border-top:1px solid var(--border)}
+  .section-head{margin-bottom:50px}
+  .section-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);letter-spacing:0.2em;margin-bottom:10px;display:block}
+  h2{font-size:clamp(28px,4vw,42px);font-weight:600;letter-spacing:-0.02em;margin-bottom:14px}
+  h3{font-size:24px;font-weight:600;margin-bottom:16px;color:var(--accent-2)}
+  .section-head p{color:var(--muted);font-size:16px;max-width:680px}
+
+  /* PROBLEM/SOLUTION SPLIT */
+  .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  @media(max-width:800px){.split-grid{grid-template-columns:1fr}}
+  .split-card{padding:32px;border-radius:16px;border:1px solid var(--border)}
+  .split-card.problem{background:rgba(255,92,108,0.05);border-color:rgba(255,92,108,0.2)}
+  .split-card.solution{background:rgba(74,222,128,0.05);border-color:rgba(74,222,128,0.2)}
+  .split-icon{font-size:32px;margin-bottom:16px}
+  .split-card h4{font-size:20px;margin-bottom:12px;font-weight:600}
+  .split-card.problem h4{color:var(--danger)}
+  .split-card.solution h4{color:var(--ok)}
+  .split-card p{font-size:14px;color:var(--muted);margin-bottom:12px}
+  .split-card ul{list-style:none;padding:0}
+  .split-card li{font-size:14px;padding:4px 0 4px 20px;position:relative;color:var(--text)}
+  .split-card.problem li::before{content:'✕';position:absolute;left:0;color:var(--danger);font-weight:bold}
+  .split-card.solution li::before{content:'✓';position:absolute;left:0;color:var(--ok);font-weight:bold}
+
+  /* FLOW DIAGRAM */
+  .flow-container{display:grid;grid-template-columns:repeat(4, 1fr);gap:16px;margin:40px 0}
+  @media(max-width:900px){.flow-container{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:500px){.flow-container{grid-template-columns:1fr}}
+  .flow-step{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;position:relative;transition:all .3s}
+  .flow-step:hover{border-color:var(--accent);transform:translateY(-4px)}
+  .flow-step .step-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);background:rgba(0,229,255,0.1);padding:4px 10px;border-radius:20px;display:inline-block;margin-bottom:14px}
+  .flow-icon{font-size:36px;margin-bottom:14px}
+  .flow-step h4{font-size:15px;margin-bottom:8px}
+  .flow-step p{font-size:12px;color:var(--muted);line-height:1.5}
+  .flow-arrow{text-align:center;font-size:24px;color:var(--accent);display:flex;align-items:center;justify-content:center}
+  @media(max-width:900px){.flow-arrow{transform:rotate(90deg);height:20px}}
+
+  /* HARDWARE DIAGRAM */
+  .hw-container{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center}
+  @media(max-width:800px){.hw-container{grid-template-columns:1fr}}
+  .hw-visual{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:40px;display:flex;justify-content:center}
+  .hw-features{display:flex;flex-direction:column;gap:16px}
+  .hw-feature{display:flex;gap:16px;align-items:flex-start;padding:16px;background:var(--panel);border:1px solid var(--border);border-radius:12px}
+  .hw-feature .ico{width:40px;height:40px;border-radius:10px;background:rgba(0,229,255,0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .hw-feature h4{font-size:15px;margin-bottom:4px}
+  .hw-feature p{font-size:13px;color:var(--muted)}
+
+  /* APP UI MOCKUP */
+  .app-container{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+  @media(max-width:800px){.app-container{grid-template-columns:1fr}}
+  .phone-mockup{
+    width:260px;height:520px;background:#070b11;border:6px solid #2a3a52;
+    border-radius:36px;margin:0 auto;position:relative;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .phone-notch{width:100px;height:20px;background:#2a3a52;border-radius:0 0 16px 16px;margin:0 auto}
+  .phone-screen{padding:16px;height:100%;display:flex;flex-direction:column}
+  .status-bar{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:20px}
+  .status-bar .offline{color:var(--danger);font-weight:bold}
+  .alert-card{background:rgba(255,92,108,0.15);border:1px solid var(--danger);border-radius:12px;padding:16px;margin-bottom:12px;animation:flash 2s infinite}
+  @keyframes flash{0%,100%{box-shadow:0 0 0 rgba(255,92,108,0)}50%{box-shadow:0 0 20px rgba(255,92,108,0.3)}}
+  .alert-title{color:var(--danger);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+  .alert-msg{font-size:13px;line-height:1.4}
+  .alert-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:8px}
+  .normal-card{background:var(--panel-2);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .normal-title{color:var(--ok);font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:6px}
+  .normal-msg{font-size:12px;color:var(--muted);line-height:1.4}
+
+  /* COST TABLE */
+  .cost-table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;font-size:14px}
+  .cost-table th,.cost-table td{padding:14px 20px;text-align:left;border-bottom:1px solid var(--border)}
+  .cost-table th{background:var(--panel-2);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;font-weight:500}
+  .cost-table td:first-child{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:13px}
+  .cost-table .price{color:var(--ok);font-weight:600;font-family:'JetBrains Mono',monospace}
+  .cost-table tr:last-child td{border-bottom:none}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:30px}
+  .timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+  .timeline-item{position:relative;padding-bottom:30px}
+  .timeline-item::before{content:'';position:absolute;left:-30px;top:4px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:3px solid var(--accent);box-shadow:0 0 10px var(--accent)}
+  .timeline-item h4{font-size:16px;margin-bottom:6px;color:var(--accent)}
+  .timeline-item .duration{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);margin-bottom:6px}
+  .timeline-item p{font-size:14px;color:var(--muted)}
+
+  /* CALL OUT */
+  .callout{background:rgba(0,229,255,0.05);border-left:3px solid var(--accent);padding:16px 20px;border-radius:0 10px 10px 0;margin:20px 0;font-size:14px}
+  .callout strong{color:var(--accent)}
+
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px;transition:all .25s}
+  .card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,229,255,0.1)}
+  .card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(0,229,255,0.1);color:var(--accent);margin-bottom:18px;font-size:22px}
+  .card h4{font-size:17px;margin-bottom:8px;font-weight:600}
+  .card p{color:var(--muted);font-size:14px;line-height:1.6}
+
+  /* CTA */
+  .cta-box{background:linear-gradient(135deg,rgba(0,229,255,0.1),rgba(124,77,255,0.1));border:1px solid var(--accent);border-radius:20px;padding:50px;text-align:center;margin-top:40px}
+  .cta-box h2{margin-bottom:14px}
+  .cta-box p{color:var(--muted);max-width:600px;margin:0 auto 24px}
+  .cta-btn{display:inline-block;background:var(--accent);color:var(--bg);font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:14px;transition:all .2s;letter-spacing:0.05em;text-transform:uppercase}
+  .cta-btn:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(0,229,255,0.4)}
+
+  footer{border-top:1px solid var(--border);padding:40px 0;text-align:center;color:var(--muted);font-size:13px}
+  footer .freq{font-family:'JetBrains Mono',monospace;color:var(--accent);margin-top:8px;font-size:11px;letter-spacing:0.2em}
+
+  .reveal{opacity:0;transform:translateY(20px);transition:all .6s ease}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  @media(max-width:600px){.nav-links{display:none}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span class="logo-dot"></span>Project Aether</div>
+    <div class="nav-links">
+      <a href="#problem">01 · Problem</a>
+      <a href="#solution">02 · Solution</a>
+      <a href="#how">03 · How It Works</a>
+      <a href="#hardware">04 · Hardware</a>
+      <a href="#app">05 · App</a>
+      <a href="#cost">06 · Cost</a>
+      <a href="#roadmap">07 · Roadmap</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Offline Emergency Broadcast Network · No Internet Required</span>
+    <h1>When the <span class="glow">Internet Dies</span>,<br>The City Still Speaks.</h1>
+    <p class="lead">Project Aether is a city-wide emergency broadcast system that delivers life-saving text alerts directly to citizens' smartphones using LoRa radio and Bluetooth BLE. No cell towers, no Wi-Fi, no monthly data fees.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="v">$10</span><span class="l">Cost per neighborhood hub</span></div>
+      <div class="stat"><span class="v">0 MB</span><span class="l">Internet required</span></div>
+      <div class="stat"><span class="v">&lt; 2s</span><span class="l">City-wide alert delay</span></div>
+      <div class="stat"><span class="v">100%</span><span class="l">Leverages existing phones</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- 01 PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">SECTION 01</span>
+      <h2>The Dead Zone Problem</h2>
+      <p>When disaster strikes, communication is the first casualty. Existing systems fail exactly when they are needed most.</p>
+    </div>
+    <div class="split-grid">
+      <div class="split-card problem reveal">
+        <div class="split-icon">📡</div>
+        <h4>Cellular Networks Fail</h4>
+        <p>During earthquakes, floods, or storms, cell towers lose power or get overloaded. SMS and internet go down.</p>
+        <ul>
+          <li>Towers require grid power and fiber optics</li>
+          <li>Networks congestion during panic</li>
+          <li>Repair takes days or weeks</li>
+        </ul>
+      </div>
+      <div class="split-card problem reveal">
+        <div class="split-icon">💸</div>
+        <h4>Satellite & Pagers are Expensive</h4>
+        <p>Issuing satellite phones or custom pagers to every citizen is financially impossible for any municipality.</p>
+        <ul>
+          <li>High hardware cost per user</li>
+          <li>Monthly subscription fees</li>
+          <li>Citizens must carry extra devices</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 SOLUTION -->
+<section id="solution">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">SECTION 02</span>
+      <h2>The Aether Solution</h2>
+      <p>Use the government's ability to build a long-range radio network, and bridge it to the devices citizens already carry in their pockets via Bluetooth.</p>
+    </div>
+    <div class="split-grid">
+      <div class="split-card solution reveal">
+        <div class="split-icon">📻</div>
+        <h4>Long-Range LoRa Backbone</h4>
+        <p>The city installs cheap LoRa radio transmitters. They broadcast encrypted text alerts over 433MHz radio, immune to internet outages and cell tower failures.</p>
+        <ul>
+          <li>Travels up to 15km per node</li>
+          <li>Penetrates buildings and debris</li>
+          <li>Operates on solar/battery power</li>
+        </ul>
+      </div>
+      <div class="split-card solution reveal">
+        <div class="split-icon">📱</div>
+        <h4>Bluetooth BLE Bridge</h4>
+        <p>Solar-powered "Bridge Hubs" placed in neighborhoods listen for the LoRa radio signal and instantly rebroadcast it as a Bluetooth Low Energy (BLE) beacon to nearby smartphones.</p>
+        <ul>
+          <li>Citizens just need a free app</li>
+          <li>App works with phone in airplane mode</li>
+          <li>Zero hardware cost for the public</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 HOW IT WORKS -->
+<section id="how">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">SECTION 03</span>
+      <h2>How A Message Travels</h2>
+      <p>From the Mayor's desk to a citizen's lock screen in under 2 seconds, completely bypassing the commercial internet.</p>
+    </div>
+
+    <div class="flow-container">
+      <div class="flow-step reveal">
+        <span class="step-num">STEP 01</span>
+        <div class="flow-icon">🏛️</div>
+        <h4>City Command</h4>
+        <p>Official types an alert on a secure offline terminal connected to a LoRa radio.</p>
+      </div>
+      <div class="flow-arrow reveal">→</div>
+      <div class="flow-step reveal">
+        <span class="step-num">STEP 02</span>
+        <div class="flow-icon">⛰️</div>
+        <h4>Radio Repeaters</h4>
+        <p>Solar-powered repeaters on water towers receive the 433MHz signal and blast it across the city.</p>
+      </div>
+      <div class="flow-arrow reveal">→</div>
+      <div class="flow-step reveal">
+        <span class="step-num">STEP 03</span>
+        <div class="flow-icon">🔌</div>
+        <h4>Neighborhood Bridge</h4>
+        <p>A $10 hub on a local pole catches the radio message and converts it to a Bluetooth BLE beacon.</p>
+      </div>
+      <div class="flow-arrow reveal">→</div>
+      <div class="flow-step reveal">
+        <span class="step-num">STEP 04</span>
+        <div class="flow-icon">📲</div>
+        <h4>Citizen Phone</h4>
+        <p>The offline app detects the BLE beacon, triggers a loud alarm, and displays the text on screen.</p>
+      </div>
+    </div>
+
+    <div class="callout reveal">
+      <strong>Why Bluetooth BLE?</strong> Every modern smartphone has BLE. It works even if the phone has no SIM card or is in Airplane Mode. The app runs a background service listening for a specific "Aether UUID" broadcasted by the hubs.
+    </div>
+  </div>
+</section>
+
+<!-- 04 HARDWARE -->
+<section id="hardware">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">SECTION 04</span>
+      <h2>The "Bridge Hub" Hardware</h2>
+      <p>The core of the system. A minimalist, solar-powered device that translates LoRa radio waves into Bluetooth signals.</p>
+    </div>
+    <div class="hw-container">
+      <div class="hw-visual reveal">
+        <svg viewBox="0 0 300 300" width="100%" style="max-width:320px">
+          <!-- Solar Panel -->
+          <rect x="60" y="30" width="180" height="50" rx="4" fill="#1a2535" stroke="#4fc3f7" stroke-width="2"/>
+          <line x1="90" y1="30" x2="90" y2="80" stroke="#2a3a52"/>
+          <line x1="120" y1="30" x2="120" y2="80" stroke="#2a3a52"/>
+          <line x1="150" y1="30" x2="150" y2="80" stroke="#2a3a52"/>
+          <line x1="180" y1="30" x2="180" y2="80" stroke="#2a3a52"/>
+          <line x1="210" y1="30" x2="210" y2="80" stroke="#2a3a52"/>
+          <text x="150" y="110" text-anchor="middle" fill="#8a98ad" font-family="JetBrains Mono" font-size="10">5V SOLAR</text>
+          
+          <!-- Main Box -->
+          <rect x="80" y="130" width="140" height="100" rx="8" fill="#131c28" stroke="#233044" stroke-width="2"/>
+          <text x="150" y="160" text-anchor="middle" fill="#00e5ff" font-family="JetBrains Mono" font-size="14" font-weight="700">AETHER HUB</text>
+          
+          <!-- ESP32 Chip -->
+          <rect x="110" y="175" width="80" height="40" rx="4" fill="#0d1420" stroke="#7c4dff" stroke-width="1.5"/>
+          <text x="150" y="195" text-anchor="middle" fill="#7c4dff" font-family="JetBrains Mono" font-size="10">ESP32</text>
+          <text x="150" y="207" text-anchor="middle" fill="#8a98ad" font-family="JetBrains Mono" font-size="7">BLE + WIFI</text>
+          
+          <!-- LoRa Module -->
+          <rect x="20" y="155" width="50" height="50" rx="3" fill="#0d1420" stroke="#00e5ff" stroke-width="1.5"/>
+          <text x="45" y="180" text-anchor="middle" fill="#00e5ff" font-family="JetBrains Mono" font-size="8">RA-01</text>
+          <text x="45" y="190" text-anchor="middle" fill="#8a98ad" font-family="JetBrains Mono" font-size="6">433MHz</text>
+          
+          <!-- Antennas -->
+          <line x1="45" y1="155" x2="45" y2="120" stroke="#00e5ff" stroke-width="2"/>
+          <circle cx="45" cy="118" r="3" fill="#00e5ff"/>
+          <text x="45" y="110" text-anchor="middle" fill="#8a98ad" font-family="JetBrains Mono" font-size="7">LoRa</text>
+          
+          <path d="M 250 160 Q 260 140 250 120" stroke="#7c4dff" stroke-width="2" fill="none"/>
+          <path d="M 250 160 Q 240 140 250 120" stroke="#7c4dff" stroke-width="2" fill="none"/>
+          <text x="255" y="110" text-anchor="middle" fill="#8a98ad" font-family="JetBrains Mono" font-size="7">BLE</text>
+          
+          <!-- Battery -->
+          <rect x="90" y="240" width="120" height="20" rx="3" fill="#1a2535" stroke="#4ade80" stroke-width="1.5"/>
+          <text x="150" y="254" text-anchor="middle" fill="#4ade80" font-family="JetBrains Mono" font-size="8">18650 BATTERY</text>
+          
+          <!-- Poles -->
+          <line x1="140" y1="260" x2="140" y2="290" stroke="#233044" stroke-width="4"/>
+          <line x1="160" y1="260" x2="160" y2="290" stroke="#233044" stroke-width="4"/>
+        </svg>
+      </div>
+      <div class="hw-features">
+        <div class="hw-feature reveal">
+          <div class="ico">🧠</div>
+          <div><h4>ESP32 Microcontroller</h4><p>The brain. Handles LoRa SPI communication and broadcasts Bluetooth BLE simultaneously.</p></div>
+        </div>
+        <div class="hw-feature reveal">
+          <div class="ico">📶</div>
+          <div><h4>LoRa RA-01 (433MHz)</h4><p>Receives the long-range encrypted signal from the City Command repeaters.</p></div>
+        </div>
+        <div class="hw-feature reveal">
+          <div class="ico">☀️</div>
+          <div><h4>Solar + 18650 Battery</h4><p>Runs 24/7 off-grid. Survives total power blackouts for weeks.</p></div>
+        </div>
+        <div class="hw-feature reveal">
+          <div class="ico">🔧</div>
+          <div><h4>Enclosed & Weatherproof</h4><p>Mounted on light poles or roofs every 1-2 km in dense neighborhoods.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 THE APP -->
+<section id="app">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">SECTION 05</span>
+      <h2>The Citizen App</h2>
+      <p>Free, lightweight, and works completely offline. Citizens download it once via app stores, and it runs quietly in the background.</p>
+    </div>
+    <div class="app-container">
+      <div class="reveal">
+        <div class="phone-mockup">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span>9:41 AM</span>
+              <span class="offline">✈ OFFLINE</span>
+            </div>
+            
+            <div class="alert-card">
+              <div class="alert-title">⚠ Emergency Alert</div>
+              <div class="alert-msg">Flash flood warning. River levels critical. Move to high ground immediately.</div>
+              <div class="alert-time">via Aether BLE · 0.8s ago</div>
+            </div>
+
+            <div class="normal-card" style="margin-top:auto; margin-bottom:12px">
+              <div class="normal-title">Previous Update</div>
+              <div class="normal-msg">Road closure on Main St. Avoid downtown area.</div>
+              <div class="alert-time">2 hours ago</div>
+            </div>
+
+            <div class="normal-card">
+              <div class="normal-title">System Status</div>
+              <div class="normal-msg">Listening for Aether Hubs... No internet required.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <h3 style="margin-bottom:20px">App Architecture</h3>
+        <div class="grid" style="gap:14px">
+          <div class="card" style="padding:18px">
+            <h4 style="color:var(--accent);margin-bottom:6px">1. Background Scanner</h4>
+            <p style="font-size:13px">Uses Android/iOS BLE APIs to scan for the specific Aether UUID every 2 seconds without draining battery.</p>
+          </div>
+          <div class="card" style="padding:18px">
+            <h4 style="color:var(--accent);margin-bottom:6px">2. Payload Decryptor</h4>
+            <p style="font-size:13px">Once a hub is found, it reads the BLE manufacturer data payload (up to 255 bytes). AES-128 decryption runs locally.</p>
+          </div>
+          <div class="card" style="padding:18px">
+            <h4 style="color:var(--accent);margin-bottom:6px">3. Critical Notification</h4>
+            <p style="font-size:13px">Bypasses phone's silent mode. Triggers a loud siren and displays the alert as a full-screen high-priority push notification.</p>
+          </div>
+          <div class="card" style="padding:18px">
+            <h4 style="color:var(--accent);margin-bottom:6px">4. Offline Cache</h4>
+            <p style="font-size:13px">Stores last 10 messages in local SQLite DB so citizens can review them even if the hub moves out of range.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 COST -->
+<section id="cost">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">SECTION 06</span>
+      <h2>Cost Breakdown</h2>
+      <p>Project Aether is designed to be deployed by even the most budget-constrained municipalities. The math speaks for itself.</p>
+    </div>
+    
+    <h3 class="reveal" style="margin-bottom:16px">Per Neighborhood Bridge Hub</h3>
+    <table class="cost-table reveal" style="margin-bottom:40px">
+      <thead><tr><th>Component</th><th>Part</th><th>Est. Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Microcontroller</td><td>ESP32 Dev Board</td><td class="price">$4.00</td></tr>
+        <tr><td>Radio Receiver</td><td>LoRa RA-01 (433MHz)</td><td class="price">$4.00</td></tr>
+        <tr><td>Power Source</td><td>5V Solar Panel + 18650 Battery</td><td class="price">$5.00</td></tr>
+        <tr><td>Enclosure</td><td>IP65 PVC Weatherproof Box</td><td class="price">$3.00</td></tr>
+        <tr><td>Antenna</td><td>433MHz Spring Antenna</td><td class="price">$1.00</td></tr>
+        <tr><td>Misc</td><td>Wires, voltage regulator, PCB</td><td class="price">$3.00</td></tr>
+        <tr style="background:rgba(74,222,128,0.05)"><td><strong>Total Per Hub</strong></td><td>Fully Functional Unit</td><td class="price"><strong>$20.00</strong></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout reveal">
+      <strong>Example City (100,000 population):</strong> Assuming 50 neighborhood hubs to cover a 10 sq km area, the total hardware cost for the city is <strong>$1,000</strong>. The app is free for citizens. Ongoing cost is zero.
+    </div>
+  </div>
+</section>
+
+<!-- 07 ROADMAP -->
+<section id="roadmap">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="section-num">SECTION 07</span>
+      <h2>Implementation Roadmap</h2>
+      <p>A phased approach to deploy Project Aether safely and effectively.</p>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item reveal">
+        <h4>Phase 1: Proof of Concept</h4>
+        <div class="duration">Weeks 1-4</div>
+        <p>Build 3 prototype hubs. Develop the Android app. Test end-to-end message delivery from a laptop to a smartphone across a neighborhood. Measure BLE range in urban environments.</p>
+      </div>
+      <div class="timeline-item reveal">
+        <h4>Phase 2: City Backbone</h4>
+        <div class="duration">Months 2-3</div>
+        <p>Install solar-powered LoRa repeaters on 3-4 city-owned high points (water towers, city hall roof). Map coverage using RSSI data from a mobile testing rig.</p>
+      </div>
+      <div class="timeline-item reveal">
+        <h4>Phase 3: Neighborhood Hubs</h4>
+        <div class="duration">Months 4-5</div>
+        <p>Deploy 50 Bridge Hubs on light poles. Launch the citizen app publicly. Run a city-wide emergency drill comparing Aether's delivery rate to traditional SMS.</p>
+      </div>
+      <div class="timeline-item reveal">
+        <h4>Phase 4: Full Integration</h4>
+        <div class="duration">Month 6+</div>
+        <p>Integrate the Command Center software with existing emergency dispatch systems. Add multilingual support and accessibility features (vibration patterns for hearing impaired).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section>
+  <div class="wrap">
+    <div class="cta-box reveal">
+      <h2>Ready to Build the Lifeline?</h2>
+      <p>Project Aether proves that life-saving infrastructure doesn't require billion-dollar budgets. It requires the right frequencies, cheap silicon, and the will to protect citizens when the grid goes dark.</p>
+      <a href="#" class="cta-btn">Download Technical Whitepaper</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <p>Project Aether Concept Pitch · LoRa 433MHz + BLE Offline Broadcast</p>
+    <p class="freq">FREQ 433.000 MHz · BLE UUID 0xAETHER · ENCRYPTED AES-128</p>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){e.target.classList.add('visible')}
+    });
+  },{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+</script>
+
+</body>
+</html>
