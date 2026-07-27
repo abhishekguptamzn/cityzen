@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart CityZen - Your Ultimate City Lifestyle Companion</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        /* ==========================================================================
+           1. CSS VARIABLES & THEME DEFINITIONS (MATERIAL 3 + GLASSMORPHISM)
+           ========================================================================== */
+        :root {
+            /* Light Theme Palette */
+            --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            --surface: rgba(255, 255, 255, 0.75);
+            --surface-solid: #ffffff;
+            --surface-card: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            --primary: #4F46E5;
+            --primary-gradient: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+            --primary-light: rgba(79, 70, 229, 0.1);
+            --secondary: #0EA5E9;
+            --accent: #F59E0B;
+            --success: #10B981;
+            --danger: #EF4444;
+            --text-primary: #0F172A;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-color: rgba(226, 232, 240, 0.8);
+            
+            /* Dimensions & Spacing */
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-xl: 32px;
+            --nav-height: 72px;
+            --header-height: 64px;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme Palette */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --surface: rgba(30, 41, 59, 0.75);
+            --surface-solid: #1e293b;
+            --surface-card: rgba(30, 41, 59, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --primary: #6366F1;
+            --primary-gradient: linear-gradient(135deg, #818CF8 0%, #4F46E5 100%);
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --text-primary: #F8FAFC;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border-color: rgba(51, 65, 85, 0.8);
+        }
+
+        /* ==========================================================================
+           2. RESET & BASE TYPOGRAPHY
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Mobile App Shell Simulation for Desktop View */
+        #app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Utility Classes */
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+        .glass-card {
+            background: var(--surface-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .glass-card:active {
+            transform: scale(0.98);
+        }
+        .flex { display: flex; }
+        .flex-col { display: flex; flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .gap-1 { gap: 4px; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+        .gap-4 { gap: 16px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-4 { margin-bottom: 16px; }
+        .p-4 { padding: 16px; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-bold { font-weight: 700; }
+        .text-muted { color: var(--text-secondary); }
+        .text-primary { color: var(--primary); }
+        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hidden { display: none !important; }
+
+        /* Material Symbols Styling */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+            user-select: none;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* ==========================================================================
+           3. UI COMPONENTS (BUTTONS, INPUTS, BADGES, CARDS)
+           ========================================================================== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border-radius: var(--radius-xl);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-ghost {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+        .input-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--surface-solid);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-accent { background: rgba(245, 158, 11, 0.15); color: var(--accent); }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+        /* ==========================================================================
+           4. APPLICATION FLOW SCREENS (SPLASH, ONBOARDING, AUTH)
+           ========================================================================== */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-gradient);
+            z-index: 10;
+            overflow-y: auto;
+            padding-bottom: var(--nav-height);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .screen.active { z-index: 20; }
+        .screen-full { padding-bottom: 0; z-index: 30; }
+
+        /* Splash Screen */
+        #splash-screen {
+            justify-content: center;
+            align-items: center;
+            background: var(--primary-gradient);
+            color: white;
+            z-index: 100;
+        }
+        .splash-logo {
+            width: 96px;
+            height: 96px;
+            border-radius: var(--radius-lg);
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+        .splash-logo .material-symbols-outlined { font-size: 56px; color: white; }
+        .loader {
+            width: 40px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 32px;
+        }
+        .loader::after {
+            content: '';
+            display: block;
+            width: 50%;
+            height: 100%;
+            background: white;
+            animation: load 1.5s infinite ease-in-out;
+        }
+
+        /* Onboarding Screen */
+        .onboarding-slide {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            text-align: center;
+        }
+        .onboarding-img {
+            width: 280px;
+            height: 280px;
+            border-radius: var(--radius-xl);
+            object-fit: cover;
+            margin-bottom: 32px;
+            box-shadow: var(--glass-shadow);
+        }
+        .dots-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 24px 0;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .dot.active { width: 24px; background: var(--primary); }
+
+        /* Auth Screens */
+        .auth-container {
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100%;
+        }
+        .auth-header { margin-bottom: 32px; }
+        .auth-header h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+
+        /* ==========================================================================
+           5. MAIN DASHBOARD & NAVIGATION
+           ========================================================================== */
+        /* Top App Bar */
+        .top-bar {
+            height: var(--header-height);
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .user-greeting { display: flex; align-items: center; gap: 12px; }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 50;
+            padding: 0 8px;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+        .nav-item.active {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+
+        /* Dashboard Content Components */
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: calc(var(--nav-height) + 16px);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 24px 0 12px 0;
+        }
+        .section-title { font-size: 1.1rem; font-weight: 700; }
+        .see-all { font-size: 0.85rem; color: var(--primary); font-weight: 600; cursor: pointer; }
+
+        /* Weather Card */
+        .weather-card {
+            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+            color: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.3);
+            margin-bottom: 20px;
+        }
+
+        /* Horizontal Scroll Lists (Categories & Featured) */
+        .h-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+        }
+        .h-scroll::-webkit-scrollbar { display: none; }
+        
+        .cat-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--surface-solid);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .cat-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Business & Event Cards */
+        .biz-card {
+            min-width: 260px;
+            width: 260px;
+            background: var(--surface-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .biz-card:active { transform: scale(0.97); }
+        .biz-img-wrapper {
+            position: relative;
+            height: 140px;
+            width: 100%;
+        }
+        .biz-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .biz-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            color: white;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .biz-fav-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .biz-fav-btn.active { color: var(--danger); }
+        .biz-content { padding: 12px; }
+        .biz-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+        
+        /* Grid Layout for Explore */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .grid-2 .biz-card { width: 100%; min-width: unset; }
+
+        /* ==========================================================================
+           6. SUB-VIEWS & DETAIL SCREENS
+           ========================================================================== */
+        .detail-hero {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        .detail-img { width: 100%; height: 100%; object-fit: cover; }
+        .back-btn-float {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+        }
+        
+        /* Membership Card Component */
+        .id-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            color: white;
+            background-color: #1e1b4b; /* Deep indigo fallback */
+        }
+        .id-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: var(--primary);
+            filter: blur(50px);
+            z-index: 0;
+        }
+        .id-card-content { position: relative; z-index: 1; }
+
+        /* Notifications & Settings Lists */
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--surface-solid);
+            cursor: pointer;
+        }
+        .list-item:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+        .list-item:last-child { border-bottom: none; border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); }
+
+        /* Toast & Modal Overlay */
+        #toast-container {
+            position: absolute;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 90%;
+            pointer-events: none;
+        }
+        .toast {
+            background: rgba(15, 23, 42, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideUp 0.3s ease forwards;
+        }
+        
+        #modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            display: flex;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .bottom-sheet {
+            background: var(--surface-solid);
+            width: 100%;
+            max-height: 80vh;
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+            padding: 24px 16px;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #modal-overlay.active .bottom-sheet { transform: translateY(0); }
+
+        /* ==========================================================================
+           7. ANIMATIONS & KEYFRAMES
+           ========================================================================== */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes load {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in { animation: fadeIn 0.3s ease forwards; }
+
+        /* Toggle Switch CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--border-color);
+            transition: .3s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(22px); }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <!-- ==========================================================================
+       VIEW 1: SPLASH SCREEN
+       ========================================================================== -->
+    <div id="splash-screen" class="screen screen-full active">
+        <div class="splash-logo">
+            <span class="material-symbols-outlined">location_city</span>
+        </div>
+        <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.5px;">Smart CityZen</h1>
+        <p style="font-size: 0.95rem; opacity: 0.8; margin-top: 4px;">Explore. Connect. Experience.</p>
+        <div class="loader"></div>
+    </div>
+
+    <!-- ==========================================================================
+       VIEW 2: ONBOARDING SCREENS
+       ========================================================================== -->
+    <div id="onboarding-screen" class="screen screen-full hidden">
+        <div class="onboarding-slide fade-in" id="ob-slide-content">
+            <!-- Content populated via JS -->
+        </div>
+        <div style="padding: 24px; width: 100%;">
+            <div class="dots-container" id="ob-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <button class="btn btn-primary mb-4" id="ob-next-btn">Next</button>
+            <button class="btn btn-ghost" id="ob-skip-btn">Skip Onboarding</button>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+       VIEW 3: AUTHENTICATION (LOGIN / REGISTER / OTP / SETUP)
+       ========================================================================== -->
+    <div id="auth-screen" class="screen screen-full hidden">
+        <div class="auth-container fade-in" id="auth-content">
+            <!-- Dynamic Auth Forms rendered by JS -->
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+       VIEW 4: MAIN APPLICATION SPA SHELL
+       ========================================================================== -->
+    <div id="main-app" class="screen hidden" style="padding-bottom: 0;">
+        <!-- Sticky Top Bar -->
+        <header class="top-bar">
+            <div class="user-greeting" id="header-profile-trigger" style="cursor: pointer;">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Avatar" class="avatar" id="header-avatar">
+                <div>
+                    <div class="text-xs text-muted">Welcome back,</div>
+                    <div class="text-bold text-sm" id="header-name">Alex Johnson</div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn-icon" onclick="Router.navigate('search')">
+                    <span class="material-symbols-outlined">search</span>
+                </button>
+                <button class="btn-icon" onclick="Router.navigate('notifications')" style="position: relative;">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span id="notif-badge" style="position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--danger); border-radius: 50%;"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Scroll Area -->
+        <main class="content-scroll" id="main-content">
+            <!-- View injections go here -->
+        </main>
+
+        <!-- Persistent Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="Router.navigate('home')" data-tab="home">
+                <span class="material-symbols-outlined">home</span>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="Router.navigate('explore')" data-tab="explore">
+                <span class="material-symbols-outlined">explore</span>
+                <span>Explore</span>
+            </button>
+            <button class="nav-item" onclick="Router.navigate('events')" data-tab="events">
+                <span class="material-symbols-outlined">event</span>
+                <span>Events</span>
+            </button>
+            <button class="nav-item" onclick="Router.navigate('favorites')" data-tab="favorites">
+                <span class="material-symbols-outlined">favorite</span>
+                <span>Saved</span>
+            </button>
+            <button class="nav-item" onclick="Router.navigate('profile')" data-tab="profile">
+                <span class="material-symbols-outlined">person</span>
+                <span>Profile</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ==========================================================================
+       MODAL BOTTOM SHEET & TOASTS
+       ========================================================================== -->
+    <div id="modal-overlay" onclick="closeModal(event)">
+        <div class="bottom-sheet" id="modal-content" onclick="event.stopPropagation()">
+            <!-- Dynamic Modal Content -->
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+</div>
+
+<script>
+    /* ==========================================================================
+       1. DATA GENERATION ENGINE & MOCK DATASETS
+       ========================================================================== */
+    const CATEGORIES = [
+        { id: 'all', name: 'All', icon: 'grid_view' },
+        { id: 'restaurants', name: 'Restaurants', icon: 'restaurant' },
+        { id: 'cafes', name: 'Cafes & Bakery', icon: 'local_cafe' },
+        { id: 'hotels', name: 'Hotels & Stays', icon: 'hotel' },
+        { id: 'shopping', name: 'Shopping Malls', icon: 'shopping_bag' },
+        { id: 'gyms', name: 'Fitness & Gyms', icon: 'fitness_center' },
+        { id: 'hospitals', name: 'Healthcare', icon: 'local_hospital' },
+        { id: 'entertainment', name: 'Entertainment', icon: 'movie' },
+        { id: 'parks', name: 'Parks & Rec', icon: 'park' }
+    ];
+
+    // Seed Data Generators for 40+ Businesses and 20+ Events
+    const BIZ_TEMPLATES = [
+        { name: "The Artisan Kitchen", cat: "restaurants", img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80", desc: "Fine dining restaurant serving contemporary cuisine crafted from locally sourced, organic ingredients." },
+        { name: "Velvet Roast Cafe", cat: "cafes", img: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80", desc: "Cozy specialty coffee shop with artisanal pastries, fast Wi-Fi, and a relaxed ambiance for remote workers." },
+        { name: "Grand Horizon Hotel", cat: "hotels", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80", desc: "5-star luxury hotel featuring panoramic city views, rooftop infinity pool, and world-class spa facilities." },
+        { name: "Metro Galleria Mall", cat: "shopping", img: "https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?auto=format&fit=crop&w=600&q=80", desc: "Premier shopping destination housing over 200 international fashion brands, gourmet dining, and IMAX cinema." },
+        { name: "Iron Pulse Fitness", cat: "gyms", img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", desc: "State-of-the-art fitness center offering personal training, HIIT classes, Olympic lifting platforms, and sauna." },
+        { name: "St. Jude City Hospital", cat: "hospitals", img: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=600&q=80", desc: "24/7 multi-specialty healthcare facility equipped with advanced diagnostics and emergency care units." },
+        { name: "Starlight Cinema & Bowl", cat: "entertainment", img: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=600&q=80", desc: "Ultimate entertainment hub featuring 4K Dolby Atmos screens, neon bowling lanes, and arcade gaming." },
+        { name: "Emerald Valley Park", cat: "parks", img: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=600&q=80", desc: "Lush 50-acre urban park featuring jogging trails, botanical gardens, boating lake, and dedicated kids' play zones." },
+        { name: "Sakura Sushi Bar", cat: "restaurants", img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80", desc: "Authentic Japanese dining experience featuring fresh sashimi, creative rolls, and imported sake." },
+        { name: "Brew & Books Lounge", cat: "cafes", img: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=600&q=80", desc: "A book lover's paradise combining an independent bookstore with an organic tea and coffee bar." }
+    ];
+
+    const EVENT_TEMPLATES = [
+        { title: "City Food & Wine Festival", cat: "Food", date: "2026-08-15", time: "17:00", venue: "Central Plaza", price: "$25", img: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=600&q=80", org: "Culinary Arts Guild" },
+        { title: "Tech Innovate Summit 2026", cat: "Business", date: "2026-08-20", time: "09:00", venue: "Grand Horizon Convention Centre", price: "Free", img: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80", org: "City Tech Alliance" },
+        { title: "Neon Nights Music Concert", cat: "Music", date: "2026-08-28", time: "19:30", venue: "Starlight Arena", price: "$45", img: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80", org: "LiveNation Urban" },
+        { title: "Marathon for Clean Air", cat: "Sports", date: "2026-09-05", time: "06:00", venue: "Emerald Valley Park", price: "$15", img: "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=600&q=80", org: "City Sports Club" },
+        { title: "Modern Art Exhibition", cat: "Art", date: "2026-09-12", time: "10:00", venue: "Metro Art Gallery", price: "$10", img: "https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=600&q=80", org: "Cultural Heritage Dept" }
+    ];
+
+    // Generate 40 Businesses and 20 Events programmatically
+    const BUSINESSES = [];
+    for (let i = 1; i <= 40; i++) {
+        const t = BIZ_TEMPLATES[i % BIZ_TEMPLATES.length];
+        const prefixes = ["Central", "Urban", "Prime", "Royal", "Sunset", "Golden", "Elite", "Metro"];
+        const name = i <= BIZ_TEMPLATES.length ? t.name : `${prefixes[i % prefixes.length]} ${t.name.split(' ')[0]} ${t.cat.slice(0, -1).toUpperCase()}`;
+        
+        BUSINESSES.push({
+            id: `biz-${i}`,
+            name: name,
+            category: t.cat,
+            rating: (4.0 + (i % 10) * 0.1).toFixed(1),
+            reviewsCount: 15 + (i * 7),
+            phone: `+1 (555) 019-${1000 + i}`,
+            address: `${100 + i * 12} Cityscape Blvd, Downtown`,
+            website: `https://www.${name.toLowerCase().replace(/[^a-z]/g, '')}.com`,
+            description: t.desc,
+            hours: "09:00 AM - 10:00 PM (Mon - Sun)",
+            isOpen: i % 5 !== 0, // 80% open
+            featured: i <= 5,
+            trending: i > 5 && i <= 12,
+            nearby: i % 3 === 0,
+            image: t.img,
+            gallery: [t.img, "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80", "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80"]
+        });
+    }
+
+    const EVENTS = [];
+    for (let i = 1; i <= 20; i++) {
+        const t = EVENT_TEMPLATES[i % EVENT_TEMPLATES.length];
+        EVENTS.push({
+            id: `evt-${i}`,
+            title: i <= EVENT_TEMPLATES.length ? t.title : `${t.title} - Edition #${i}`,
+            category: t.cat,
+            date: t.date,
+            time: t.time,
+            venue: `${t.venue} Hall ${i}`,
+            price: t.price,
+            image: t.img,
+            organizer: t.org,
+            description: `Join us for the most anticipated ${t.cat.toLowerCase()} event of the season at ${t.venue}. Experience live demonstrations, networking opportunities, and unforgettable moments.`
+        });
+    }
+
+    /* ==========================================================================
+       2. LOCAL STORAGE & STATE MANAGEMENT
+       ========================================================================== */
+    const Storage = {
+        get(key, fallback) {
+            try {
+                const item = localStorage.getItem(`scz_${key}`);
+                return item ? JSON.parse(item) : fallback;
+            } catch (e) { return fallback; }
+        },
+        set(key, value) {
+            try { localStorage.setItem(`scz_${key}`, JSON.stringify(value)); } catch (e) {}
+        }
+    };
+
+    // Global State
+    let State = {
+        user: Storage.get('user', null),
+        favorites: Storage.get('favorites', []), // Array of IDs
+        theme: Storage.get('theme', 'light'),
+        notifications: Storage.get('notifications', [
+            { id: 1, title: "Welcome to Smart CityZen!", desc: "Explore 40+ top-rated local businesses and upcoming events.", time: "Just now", read: false },
+            { id: 2, title: "Special Weekend Offer", desc: "Get 20% off at The Artisan Kitchen this Saturday.", time: "2h ago", read: false }
+        ]),
+        recentSearches: Storage.get('recentSearches', ['Sushi', 'Gym near me', 'Music concert']),
+        currentTab: 'home',
+        onboardingStep: 0
+    };
+
+    /* ==========================================================================
+       3. ROUTER & VIEW CONTROLLERS (SPA ARCHITECTURE)
+       ========================================================================== */
+    const Router = {
+        navigate(view, param = null) {
+            // Hide all sub-screens
+            document.querySelectorAll('.screen').forEach(s => {
+                if (s.id !== 'main-app') s.classList.add('hidden');
+            });
+            document.getElementById('main-app').classList.remove('hidden');
+
+            // Update Bottom Nav Highlighting
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === view);
+            });
+
+            // Scroll to top
+            const scrollArea = document.getElementById('main-content');
+            scrollArea.scrollTop = 0;
+
+            // Render matching view
+            switch (view) {
+                case 'home': renderHome(); break;
+                case 'explore': renderExplore(param); break;
+                case 'events': renderEvents(param); break;
+                case 'favorites': renderFavorites(); break;
+                case 'profile': renderProfile(); break;
+                case 'business-detail': renderBusinessDetail(param); break;
+                case 'event-detail': renderEventDetail(param); break;
+                case 'membership-card': renderMembershipCard(); break;
+                case 'settings': renderSettings(); break;
+                case 'notifications': renderNotifications(); break;
+                case 'search': renderSearch(); break;
+                default: renderHome();
+            }
+            State.currentTab = view;
+        }
+    };
+
+    /* ==========================================================================
+       4. UI VIEW RENDERERS (HOME, EXPLORE, DETAILS, ETC.)
+       ========================================================================== */
+    const mainContent = () => document.getElementById('main-content');
+
+    // --- VIEW: HOME DASHBOARD ---
+    function renderHome() {
+        const featuredHtml = BUSINESSES.filter(b => b.featured).map(createBizCard).join('');
+        const trendingHtml = BUSINESSES.filter(b => b.trending).map(createBizCard).join('');
+        const eventsHtml = EVENTS.slice(0, 4).map(createEventCard).join('');
+
+        const categoriesHtml = CATEGORIES.slice(1).map(c => `
+            <div class="cat-chip" onclick="Router.navigate('explore', '${c.id}')">
+                <span class="material-symbols-outlined text-primary">${c.icon}</span>
+                <span>${c.name}</span>
+            </div>
+        `).join('');
+
+        mainContent().innerHTML = `
+            <!-- Weather Widget -->
+            <div class="weather-card fade-in">
+                <div>
+                    <div class="text-xs" style="opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">Muzaffarnagar, IN</div>
+                    <div style="font-size: 2.2rem; font-weight: 800; margin: 4px 0;">28°C</div>
+                    <div class="text-sm">Sunny & Clear • AQI: 42 (Good)</div>
+                </div>
+                <span class="material-symbols-outlined" style="font-size: 64px; opacity: 0.9;">wb_sunny</span>
+            </div>
+
+            <!-- Quick Search Bar Trigger -->
+            <div class="input-field flex items-center gap-2 mb-4" style="cursor: pointer; color: var(--text-muted);" onclick="Router.navigate('search')">
+                <span class="material-symbols-outlined">search</span>
+                <span>Search restaurants, events, shopping...</span>
+            </div>
+
+            <!-- Categories -->
+            <div class="section-header">
+                <div class="section-title">Explore Categories</div>
+                <div class="see-all" onclick="Router.navigate('explore')">See All</div>
+            </div>
+            <div class="h-scroll mb-4">${categoriesHtml}</div>
+
+            <!-- Featured Businesses -->
+            <div class="section-header">
+                <div class="section-title">Featured Spotlights</div>
+                <div class="see-all" onclick="Router.navigate('explore')">See All</div>
+            </div>
+            <div class="h-scroll mb-4">${featuredHtml}</div>
+
+            <!-- Upcoming Events -->
+            <div class="section-header">
+                <div class="section-title">Upcoming Events</div>
+                <div class="see-all" onclick="Router.navigate('events')">See All</div>
+            </div>
+            <div class="flex-col gap-3 mb-4">${eventsHtml}</div>
+
+            <!-- Trending Around You -->
+            <div class="section-header">
+                <div class="section-title">Trending Near You</div>
+            </div>
+            <div class="h-scroll mb-4">${trendingHtml}</div>
+        `;
+    }
+
+    // --- VIEW: EXPLORE DIRECTORY ---
+    function renderExplore(activeCategory = 'all') {
+        const filteredBiz = activeCategory === 'all' 
+            ? BUSINESSES 
+            : BUSINESSES.filter(b => b.category === activeCategory);
+
+        const catChips = CATEGORIES.map(c => `
+            <div class="cat-chip ${c.id === activeCategory ? 'active' : ''}" onclick="renderExplore('${c.id}')">
+                <span class="material-symbols-outlined">${c.icon}</span>
+                <span>${c.name}</span>
+            </div>
+        `).join('');
+
+        mainContent().innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h2 style="font-size: 1.5rem; font-weight: 800;">Directory</h2>
+                <span class="badge">${filteredBiz.length} Places Found</span>
+            </div>
+            <div class="h-scroll mb-4">${catChips}</div>
+            <div class="grid-2 fade-in">
+                ${filteredBiz.map(createBizCard).join('')}
+            </div>
+        `;
+    }
+
+    // --- VIEW: EVENTS ---
+    function renderEvents() {
+        mainContent().innerHTML = `
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 16px;">City Events & Shows</h2>
+            <div class="flex-col gap-4 fade-in">
+                ${EVENTS.map(createEventCard).join('')}
+            </div>
+        `;
+    }
+
+    // --- VIEW: FAVORITES ---
+    function renderFavorites() {
+        const favBiz = BUSINESSES.filter(b => State.favorites.includes(b.id));
+        const favEvt = EVENTS.filter(e => State.favorites.includes(e.id));
+
+        if (favBiz.length === 0 && favEvt.length === 0) {
+            mainContent().innerHTML = `
+                <div class="flex-col items-center justify-center text-center p-4" style="height: 60vh;">
+                    <span class="material-symbols-outlined text-muted mb-4" style="font-size: 64px;">favorite</span>
+                    <h3 class="text-bold text-sm mb-4">No Saved Items Yet</h3>
+                    <p class="text-muted text-xs mb-4">Tap the heart icon on any business or event to save it for quick access later.</p>
+                    <button class="btn btn-primary" style="width: auto;" onclick="Router.navigate('explore')">Start Exploring</button>
+                </div>
+            `;
+            return;
+        }
+
+        mainContent().innerHTML = `
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 16px;">Saved Favorites</h2>
+            ${favBiz.length > 0 ? `<div class="section-title mb-4">Places (${favBiz.length})</div><div class="grid-2 mb-4">${favBiz.map(createBizCard).join('')}</div>` : ''}
+            ${favEvt.length > 0 ? `<div class="section-title mb-4">Events (${favEvt.length})</div><div class="flex-col gap-3">${favEvt.map(createEventCard).join('')}</div>` : ''}
+        `;
+    }
+
+    // --- VIEW: BUSINESS DETAILS ---
+    function renderBusinessDetail(id) {
+        const biz = BUSINESSES.find(b => b.id === id) || BUSINESSES[0];
+        const isFav = State.favorites.includes(biz.id);
+
+        mainContent().innerHTML = `
+            <div style="margin: -16px -16px 16px -16px;">
+                <div class="detail-hero">
+                    <img src="${biz.image}" class="detail-img" alt="${biz.name}">
+                    <button class="btn-icon back-btn-float" onclick="Router.navigate('explore')">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <button class="btn-icon back-btn-float" style="left: auto; right: 16px;" onclick="toggleFavorite('${biz.id}'); Router.navigate('business-detail', '${biz.id}')">
+                        <span class="material-symbols-outlined ${isFav ? 'icon-filled text-danger' : ''}">favorite</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <span class="badge badge-accent mb-4" style="text-transform: uppercase;">${biz.category}</span>
+                    <h1 style="font-size: 1.6rem; font-weight: 800;">${biz.name}</h1>
+                </div>
+                <div class="flex items-center gap-1 badge badge-success text-sm">
+                    <span class="material-symbols-outlined icon-filled" style="font-size: 16px;">star</span>
+                    <span>${biz.rating}</span>
+                </div>
+            </div>
+
+            <p class="text-muted text-sm mb-4" style="line-height: 1.6;">${biz.description}</p>
+
+            <!-- Quick Contact Info -->
+            <div class="glass-card flex-col gap-3 mb-4 text-sm">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">location_on</span>
+                    <span>${biz.address}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">schedule</span>
+                    <span>${biz.hours} • <b style="color: ${biz.isOpen ? 'var(--success)' : 'var(--danger)'}">${biz.isOpen ? 'Open Now' : 'Closed'}</b></span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">call</span>
+                    <span>${biz.phone}</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3 mb-4">
+                <button class="btn btn-primary flex-1" onclick="showToast('Opening navigation simulation...')">
+                    <span class="material-symbols-outlined">directions</span> Directions
+                </button>
+                <button class="btn btn-outline flex-1" onclick="showToast('Calling ${biz.phone}...')">
+                    <span class="material-symbols-outlined">call</span> Call Now
+                </button>
+            </div>
+
+            <!-- Facilities -->
+            <div class="section-title mb-4">Amenities & Features</div>
+            <div class="flex gap-2 mb-4" style="flex-wrap: wrap;">
+                <span class="badge"><span class="material-symbols-outlined" style="font-size:14px;">wifi</span> Free Wi-Fi</span>
+                <span class="badge"><span class="material-symbols-outlined" style="font-size:14px;">local_parking</span> Parking Available</span>
+                <span class="badge"><span class="material-symbols-outlined" style="font-size:14px;">credit_card</span> Cards Accepted</span>
+                <span class="badge"><span class="material-symbols-outlined" style="font-size:14px;">ac_unit</span> Air Conditioned</span>
+            </div>
+
+            <!-- Reviews Simulation -->
+            <div class="section-title mb-4">User Reviews (${biz.reviewsCount})</div>
+            <div class="glass-card mb-4 text-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <b class="flex items-center gap-2"><span class="material-symbols-outlined icon-filled text-accent">account_circle</span> Sarah Jenkins</b>
+                    <span class="text-xs text-muted">2 days ago</span>
+                </div>
+                <p class="text-muted">"Absolutely wonderful experience! The ambiance is unmatched and the service was super attentive. Truly a gem in the city!"</p>
+            </div>
+        `;
+    }
+
+    // --- VIEW: PROFILE ---
+    function renderProfile() {
+        const u = State.user || { name: "Alex Johnson", email: "alex.johnson@example.com", phone: "+1 555-0199", city: "Muzaffarnagar" };
+        
+        mainContent().innerHTML = `
+            <div class="flex-col items-center justify-center p-4 mb-4 text-center">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Avatar" style="width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); margin-bottom: 12px;">
+                <h2 style="font-size: 1.4rem; font-weight: 800;">${u.name}</h2>
+                <p class="text-muted text-sm mb-4">${u.email}</p>
+                <button class="btn btn-primary" style="width: auto; padding: 10px 24px;" onclick="Router.navigate('membership-card')">
+                    <span class="material-symbols-outlined">badge</span> View City ID Card
+                </button>
+            </div>
+
+            <!-- Profile Menu -->
+            <div class="flex-col mb-4">
+                <div class="list-item" onclick="Router.navigate('membership-card')">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">card_membership</span>
+                        <span class="text-sm text-bold">Digital Membership Card</span>
+                    </div>
+                    <span class="material-symbols-outlined text-muted">chevron_right</span>
+                </div>
+                <div class="list-item" onclick="Router.navigate('favorites')">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">favorite</span>
+                        <span class="text-sm text-bold">Saved Places & Events</span>
+                    </div>
+                    <span class="material-symbols-outlined text-muted">chevron_right</span>
+                </div>
+                <div class="list-item" onclick="Router.navigate('settings')">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">settings</span>
+                        <span class="text-sm text-bold">App Settings & Preferences</span>
+                    </div>
+                    <span class="material-symbols-outlined text-muted">chevron_right</span>
+                </div>
+                <div class="list-item" onclick="toggleTheme()">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">dark_mode</span>
+                        <span class="text-sm text-bold">Dark Theme Toggle</span>
+                    </div>
+                    <span class="badge text-xs">${State.theme === 'dark' ? 'ON' : 'OFF'}</span>
+                </div>
+                <div class="list-item" onclick="showToast('Logged out successfully'); showScreen('auth-screen'); renderLogin();">
+                    <div class="flex items-center gap-3 text-danger">
+                        <span class="material-symbols-outlined text-danger">logout</span>
+                        <span class="text-sm text-bold">Logout</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- VIEW: MEMBERSHIP CARD ---
+    function renderMembershipCard() {
+        const u = State.user || { name: "Alex Johnson", city: "Muzaffarnagar", phone: "+1 555-0199" };
+        const cardNo = "SCZ-2026-8891-042";
+
+        mainContent().innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h2 style="font-size: 1.4rem; font-weight: 800;">CityZen ID</h2>
+                <button class="btn-icon" onclick="Router.navigate('profile')"><span class="material-symbols-outlined">close</span></button>
+            </div>
+
+            <!-- Premium Digital ID Card -->
+            <div class="id-card mb-4 fade-in">
+                <div class="id-card-content flex-col justify-between" style="min-height: 240px;">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined" style="font-size: 28px;">location_city</span>
+                            <span style="font-weight: 800; letter-spacing: 1px;">SMART CITYZEN</span>
+                        </div>
+                        <span class="badge" style="background: rgba(255,255,255,0.2); color: white;">PRO MEMBER</span>
+                    </div>
+
+                    <div class="flex items-center gap-4 my-4">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" style="width: 64px; height: 64px; border-radius: 50%; border: 2px solid white; object-fit: cover;">
+                        <div>
+                            <div style="font-size: 1.3rem; font-weight: 800;">${u.name}</div>
+                            <div style="font-size: 0.8rem; opacity: 0.8;">Resident • ${u.city}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-end" style="border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 12px;">
+                        <div>
+                            <div style="font-size: 0.65rem; opacity: 0.7; text-transform: uppercase;">Membership ID</div>
+                            <div style="font-family: monospace; font-size: 0.95rem; font-weight: 700;">${cardNo}</div>
+                        </div>
+                        <!-- Simulated QR Code -->
+                        <div style="width: 48px; height: 48px; background: white; padding: 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="color: black; font-size: 36px;">qr_code_2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-xs text-muted text-center mb-4">Present this digital card at participating local businesses to claim exclusive citizen discounts and community privileges.</p>
+            <button class="btn btn-outline" onclick="showToast('ID Card saved to device gallery!')">
+                <span class="material-symbols-outlined">download</span> Download Digital ID
+            </button>
+        `;
+    }
+
+    // --- VIEW: SETTINGS & NOTIFICATIONS ---
+    function renderSettings() {
+        mainContent().innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h2 style="font-size: 1.4rem; font-weight: 800;">Settings</h2>
+                <button class="btn-icon" onclick="Router.navigate('profile')"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="flex-col mb-4">
+                <div class="list-item">
+                    <span class="text-sm text-bold">Push Notifications</span>
+                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                </div>
+                <div class="list-item">
+                    <span class="text-sm text-bold">Location Services</span>
+                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                </div>
+                <div class="list-item" onclick="toggleTheme(); renderSettings();">
+                    <span class="text-sm text-bold">Dark Theme</span>
+                    <span class="badge text-xs">${State.theme === 'dark' ? 'Enabled' : 'Disabled'}</span>
+                </div>
+                <div class="list-item" onclick="showToast('Version 2.4.0 (Build 2026)')">
+                    <span class="text-sm text-bold">About Smart CityZen</span>
+                    <span class="text-xs text-muted">v2.4.0</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderNotifications() {
+        const notifsHtml = State.notifications.map(n => `
+            <div class="glass-card mb-3 text-sm flex justify-between items-start" style="border-left: 4px solid var(--primary);">
+                <div>
+                    <div class="text-bold mb-4">${n.title}</div>
+                    <p class="text-muted text-xs mb-4">${n.desc}</p>
+                    <span class="text-xs text-primary" style="opacity:0.8;">${n.time}</span>
+                </div>
+                <button class="btn-icon" style="width:28px; height:28px;" onclick="showToast('Notification removed');"><span class="material-symbols-outlined" style="font-size:16px;">close</span></button>
+            </div>
+        `).join('');
+
+        mainContent().innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h2 style="font-size: 1.4rem; font-weight: 800;">Notifications</h2>
+                <button class="btn-icon" onclick="Router.navigate('home')"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="fade-in">${notifsHtml || '<p class="text-muted text-center p-4">No new notifications</p>'}</div>
+        `;
+    }
+
+    // --- VIEW: SEARCH ENGINE ---
+    function renderSearch() {
+        mainContent().innerHTML = `
+            <div class="flex items-center gap-2 mb-4">
+                <button class="btn-icon" onclick="Router.navigate('home')"><span class="material-symbols-outlined">arrow_back</span></button>
+                <input type="text" id="live-search-input" class="input-field" placeholder="Type to search businesses or events..." style="margin-bottom: 0;" autofocus oninput="handleLiveSearch(this.value)">
+            </div>
+            <div id="search-results-area" class="fade-in">
+                <div class="text-xs text-muted mb-4" style="text-transform: uppercase;">Recent Searches</div>
+                <div class="flex gap-2 mb-4" style="flex-wrap: wrap;">
+                    ${State.recentSearches.map(s => `<span class="badge" style="background:var(--surface-solid); border:1px solid var(--border-color); cursor:pointer;" onclick="document.getElementById('live-search-input').value='${s}'; handleLiveSearch('${s}')">${s}</span>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function handleLiveSearch(query) {
+        const area = document.getElementById('search-results-area');
+        if (!query.trim()) {
+            area.innerHTML = `<p class="text-muted text-sm text-center p-4">Enter a keyword above to find local places and events.</p>`;
+            return;
+        }
+        const q = query.toLowerCase();
+        const bizResults = BUSINESSES.filter(b => b.name.toLowerCase().includes(q) || b.category.toLowerCase().includes(q));
+        const evtResults = EVENTS.filter(e => e.title.toLowerCase().includes(q) || e.category.toLowerCase().includes(q));
+
+        area.innerHTML = `
+            <div class="text-xs text-muted mb-4">Found ${bizResults.length + evtResults.length} matches</div>
+            <div class="flex-col gap-3">
+                ${bizResults.map(createBizListCard).join('')}
+                ${evtResults.map(createEventCard).join('')}
+            </div>
+        `;
+    }
+
+    /* ==========================================================================
+       5. COMPONENT TEMPLATES (CARDS BUILDERS)
+       ========================================================================== */
+    function createBizCard(b) {
+        const isFav = State.favorites.includes(b.id);
+        return `
+            <div class="biz-card" onclick="Router.navigate('business-detail', '${b.id}')">
+                <div class="biz-img-wrapper">
+                    <img src="${b.image}" class="biz-img" alt="${b.name}" loading="lazy">
+                    <div class="biz-badge"><span class="material-symbols-outlined icon-filled" style="font-size:14px; color:var(--accent);">star</span> ${b.rating}</div>
+                    <button class="biz-fav-btn ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${b.id}', this)">
+                        <span class="material-symbols-outlined ${isFav ? 'icon-filled' : ''}" style="font-size:18px;">favorite</span>
+                    </button>
+                </div>
+                <div class="biz-content">
+                    <div class="biz-title truncate">${b.name}</div>
+                    <div class="text-xs text-muted flex items-center gap-1 mb-4" style="text-transform: capitalize;">
+                        <span class="material-symbols-outlined text-primary" style="font-size:14px;">location_on</span> ${b.category} • Downtown
+                    </div>
+                    <div class="text-xs text-bold" style="color: ${b.isOpen ? 'var(--success)' : 'var(--danger)'}">${b.isOpen ? 'Open Now' : 'Closed'}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createBizListCard(b) {
+        return `
+            <div class="glass-card flex items-center gap-3" onclick="Router.navigate('business-detail', '${b.id}')" style="cursor: pointer;">
+                <img src="${b.image}" style="width: 60px; height: 60px; border-radius: var(--radius-sm); object-fit: cover;" alt="${b.name}">
+                <div class="flex-1 overflow-hidden">
+                    <div class="text-bold text-sm truncate">${b.name}</div>
+                    <div class="text-xs text-muted" style="text-transform: capitalize;">${b.category} • ★ ${b.rating}</div>
+                </div>
+                <span class="material-symbols-outlined text-muted">chevron_right</span>
+            </div>
+        `;
+    }
+
+    function createEventCard(e) {
+        const isFav = State.favorites.includes(e.id);
+        return `
+            <div class="glass-card flex gap-3 items-center" onclick="showToast('Event Details: ${e.title}')" style="cursor: pointer; position: relative;">
+                <img src="${e.image}" style="width: 80px; height: 80px; border-radius: var(--radius-sm); object-fit: cover;" alt="${e.title}" loading="lazy">
+                <div class="flex-1 overflow-hidden">
+                    <span class="badge mb-4">${e.category}</span>
+                    <div class="text-bold text-sm truncate mb-4">${e.title}</div>
+                    <div class="text-xs text-muted flex items-center gap-1">
+                        <span class="material-symbols-outlined text-primary" style="font-size: 14px;">calendar_today</span>
+                        ${e.date} • ${e.time}
+                    </div>
+                </div>
+                <button class="biz-fav-btn ${isFav ? 'active' : ''}" style="top: 12px; right: 12px; left: auto; position: absolute;" onclick="event.stopPropagation(); toggleFavorite('${e.id}', this)">
+                    <span class="material-symbols-outlined ${isFav ? 'icon-filled' : ''}" style="font-size:18px;">favorite</span>
+                </button>
+            </div>
+        `;
+    }
+
+    /* ==========================================================================
+       6. ONBOARDING & AUTHENTICATION LOGIC
+       ========================================================================== */
+    const OB_SLIDES = [
+        { img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80", title: "Discover Local Places", desc: "Find the best restaurants, cafes, shopping malls, and hidden gems in your city with real-time updates." },
+        { img: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80", title: "Explore City Events", desc: "Never miss out! Book tickets and join music concerts, food festivals, tech summits, and community meetups." },
+        { img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80", title: "Your Digital ID Card", desc: "Unlock exclusive citizen privileges and community discounts with your personal Smart CityZen membership." }
+    ];
+
+    function renderOnboarding() {
+        const slide = OB_SLIDES[State.onboardingStep];
+        document.getElementById('ob-slide-content').innerHTML = `
+            <img src="${slide.img}" class="onboarding-img" alt="Onboarding">
+            <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 12px;">${slide.title}</h2>
+            <p class="text-muted text-sm" style="max-width: 300px; line-height: 1.6;">${slide.desc}</p>
+        `;
+        document.querySelectorAll('#ob-dots .dot').forEach((d, idx) => {
+            d.classList.toggle('active', idx === State.onboardingStep);
+        });
+        document.getElementById('ob-next-btn').innerText = State.onboardingStep === OB_SLIDES.length - 1 ? "Get Started" : "Next";
+    }
+
+    document.getElementById('ob-next-btn')?.addEventListener('click', () => {
+        if (State.onboardingStep < OB_SLIDES.length - 1) {
+            State.onboardingStep++;
+            renderOnboarding();
+        } else {
+            showScreen('auth-screen');
+            renderLogin();
+        }
+    });
+    document.getElementById('ob-skip-btn')?.addEventListener('click', () => {
+        showScreen('auth-screen');
+        renderLogin();
+    });
+
+    // Auth Views
+    function renderLogin() {
+        document.getElementById('auth-content').innerHTML = `
+            <div class="auth-header">
+                <h1>Welcome Back!</h1>
+                <p class="text-muted text-sm">Sign in to continue your city exploration</p>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Email Address</label>
+                <input type="email" class="input-field" placeholder="name@example.com" value="alex.johnson@example.com">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Password</label>
+                <input type="password" class="input-field" placeholder="••••••••" value="password123">
+            </div>
+            <div class="flex justify-between items-center mb-4 text-sm">
+                <label class="flex items-center gap-2"><input type="checkbox" checked> Remember me</label>
+                <span class="text-primary text-bold" style="cursor: pointer;" onclick="renderForgot()">Forgot Password?</span>
+            </div>
+            <button class="btn btn-primary mb-4" onclick="completeLogin()">Sign In</button>
+            <button class="btn btn-outline mb-4" onclick="completeLogin()">Continue as Guest</button>
+            <div class="text-center text-sm">
+                Don't have an account? <span class="text-primary text-bold" style="cursor: pointer;" onclick="renderRegister()">Sign Up</span>
+            </div>
+        `;
+    }
+
+    function renderRegister() {
+        document.getElementById('auth-content').innerHTML = `
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p class="text-muted text-sm">Join the Smart CityZen community today</p>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Full Name</label>
+                <input type="text" class="input-field" id="reg-name" placeholder="Alex Johnson">
+            </div>
+            <div class="input-group">
+                <label class="input-label">City of Residence</label>
+                <input type="text" class="input-field" id="reg-city" value="Muzaffarnagar">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Mobile Number</label>
+                <input type="tel" class="input-field" placeholder="+1 (555) 000-0000">
+            </div>
+            <button class="btn btn-primary mb-4" onclick="completeLogin(true)">Create Account</button>
+            <div class="text-center text-sm">
+                Already have an account? <span class="text-primary text-bold" style="cursor: pointer;" onclick="renderLogin()">Sign In</span>
+            </div>
+        `;
+    }
+
+    function renderForgot() {
+        document.getElementById('auth-content').innerHTML = `
+            <div class="auth-header">
+                <h1>Reset Password</h1>
+                <p class="text-muted text-sm">We'll send a simulation OTP code to reset your password</p>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Email or Mobile</label>
+                <input type="text" class="input-field" placeholder="Enter registered email/phone">
+            </div>
+            <button class="btn btn-primary mb-4" onclick="showToast('OTP sent: 8492'); renderLogin();">Send OTP Code</button>
+            <button class="btn btn-ghost" onclick="renderLogin()">Back to Login</button>
+        `;
+    }
+
+    function completeLogin(isNew = false) {
+        if (isNew) {
+            const nameInput = document.getElementById('reg-name')?.value || "Alex Johnson";
+            const cityInput = document.getElementById('reg-city')?.value || "Muzaffarnagar";
+            State.user = { name: nameInput, city: cityInput, email: "alex.johnson@example.com", phone: "+1 555-0199" };
+        } else {
+            State.user = { name: "Alex Johnson", city: "Muzaffarnagar", email: "alex.johnson@example.com", phone: "+1 555-0199" };
+        }
+        Storage.set('user', State.user);
+        document.getElementById('header-name').innerText = State.user.name;
+        showToast(isNew ? "Account created successfully!" : "Logged in successfully!");
+        showScreen('main-app');
+        Router.navigate('home');
+    }
+
+    /* ==========================================================================
+       7. UTILITY & HELPER FUNCTIONS
+       ========================================================================== */
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function showToast(msg) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<span class="material-symbols-outlined text-accent" style="font-size:20px;">info</span><span>${msg}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+    }
+
+    function toggleFavorite(id, btnElem = null) {
+        const index = State.favorites.indexOf(id);
+        if (index === -1) {
+            State.favorites.push(id);
+            showToast("Added to Saved Favorites!");
+            if (btnElem) { btnElem.classList.add('active'); btnElem.querySelector('.material-symbols-outlined').classList.add('icon-filled'); }
+        } else {
+            State.favorites.splice(index, 1);
+            showToast("Removed from Favorites");
+            if (btnElem) { btnElem.classList.remove('active'); btnElem.querySelector('.material-symbols-outlined').classList.remove('icon-filled'); }
+        }
+        Storage.set('favorites', State.favorites);
+    }
+
+    function toggleTheme() {
+        State.theme = State.theme === 'light' ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', State.theme);
+        Storage.set('theme', State.theme);
+        showToast(`Switched to ${State.theme.toUpperCase()} Theme`);
+    }
+
+    function closeModal(e) {
+        document.getElementById('modal-overlay').classList.remove('active');
+    }
+
+    /* ==========================================================================
+       8. APPLICATION INITIALIZATION LIFECYCLE
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+        // Apply persisted theme
+        document.body.setAttribute('data-theme', State.theme);
+        
+        // Splash Screen Simulation Timer (2.5s)
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                // Check if user already logged in
+                if (State.user) {
+                    document.getElementById('header-name').innerText = State.user.name;
+                    showScreen('main-app');
+                    Router.navigate('home');
+                } else {
+                    showScreen('onboarding-screen');
+                    renderOnboarding();
+                }
+            }, 300);
+        }, 2500);
+
+        // Header Avatar Click to Open Profile
+        document.getElementById('header-profile-trigger')?.addEventListener('click', () => {
+            Router.navigate('profile');
+        });
+    });
+</script>
+</body>
+</html>
