@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Smart Cityzen</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<style>
+:root{
+--primary:#1e40af;--primary-light:#3b82f6;--primary-dark:#1e3a8a;
+--secondary:#059669;--secondary-light:#10b981;
+--accent:#7c3aed;--accent-light:#a78bfa;
+--bg:#f0f4ff;--bg2:#e8edf5;
+--surface:rgba(255,255,255,0.82);--surface-solid:#fff;
+--text:#1e293b;--text2:#64748b;--text3:#94a3b8;
+--border:rgba(30,64,175,0.1);
+--shadow:0 4px 24px rgba(30,64,175,0.08);
+--shadow-lg:0 8px 40px rgba(30,64,175,0.12);
+--r:16px;--rs:10px;--rxs:6px;
+--nav-h:68px;--hdr-h:60px;
+--grad1:linear-gradient(135deg,#1e3a8a,#7c3aed,#059669);
+--grad2:linear-gradient(135deg,#1e40af,#3b82f6);
+--grad3:linear-gradient(135deg,#059669,#10b981);
+--grad4:linear-gradient(135deg,#7c3aed,#a78bfa);
+}
+.dark{
+--bg:#0f172a;--bg2:#1e293b;
+--surface:rgba(30,41,59,0.85);--surface-solid:#1e293b;
+--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+--border:rgba(148,163,184,0.1);
+--shadow:0 4px 24px rgba(0,0,0,0.3);
+--shadow-lg:0 8px 40px rgba(0,0,0,0.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);transition:background .4s,color .4s}
+#app{width:100%;max-width:430px;height:100%;margin:0 auto;position:relative;overflow:hidden;background:var(--bg)}
+.page{position:absolute;inset:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s;will-change:transform,opacity;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.page.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.page.hidden-left{transform:translateX(-30%);opacity:0;pointer-events:none}
+.page.active{transform:translateX(0);opacity:1}
+.sub-page{position:absolute;inset:0;z-index:50;transform:translateX(100%);opacity:0;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .38s;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;background:var(--bg)}
+.sub-page.active{transform:translateX(0);opacity:1}
+.sub-page.exiting{transform:translateX(100%);opacity:0}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none}
+input,textarea{font-family:inherit;outline:none;border:none}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:0;height:0}
+
+/* Splash */
+#splash{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--grad1);z-index:200}
+#splash .logo-wrap{position:relative;width:100px;height:100px;margin-bottom:24px}
+#splash .logo-ring{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(255,255,255,0.3);animation:splashSpin 2s linear infinite}
+#splash .logo-ring:nth-child(2){inset:8px;border-color:rgba(255,255,255,0.5);animation-direction:reverse;animation-duration:1.5s}
+#splash .logo-icon{position:absolute;inset:18px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;animation:splashPulse 2s ease-in-out infinite}
+#splash h1{color:#fff;font-size:28px;font-weight:800;letter-spacing:-0.5px;animation:fadeUp .8s .3s both}
+#splash .tagline{color:rgba(255,255,255,0.8);font-size:13px;margin-top:8px;font-weight:400;animation:fadeUp .8s .5s both}
+#splash .loader{margin-top:40px;width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+
+@keyframes splashSpin{to{transform:rotate(360deg)}}
+@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(30,64,175,0.3)}50%{box-shadow:0 0 40px rgba(124,58,237,0.4)}}
+
+/* Onboarding */
+#onboarding{background:var(--bg);z-index:190}
+.onb-slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:60px 32px 40px;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s}
+.onb-slide.left{transform:translateX(-100%);opacity:0}
+.onb-slide.right{transform:translateX(100%);opacity:0}
+.onb-slide.center{transform:translateX(0);opacity:1}
+.onb-illust{width:220px;height:220px;margin-bottom:32px;flex-shrink:0}
+.onb-illust svg{width:100%;height:100%}
+.onb-title{font-size:22px;font-weight:800;text-align:center;margin-bottom:12px;color:var(--text)}
+.onb-desc{font-size:14px;color:var(--text2);text-align:center;line-height:1.6;max-width:300px}
+.onb-dots{display:flex;gap:8px;margin-top:auto;margin-bottom:32px}
+.onb-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);transition:all .3s}
+.onb-dot.active{width:24px;border-radius:4px;background:var(--primary)}
+.onb-actions{display:flex;gap:12px;width:100%}
+.btn-primary{flex:1;padding:14px 24px;background:var(--grad2);color:#fff;border-radius:var(--rs);font-size:15px;font-weight:700;transition:transform .2s,box-shadow .2s}
+.btn-primary:active{transform:scale(0.97)}
+.btn-ghost{padding:14px 24px;color:var(--primary);font-size:15px;font-weight:600;border-radius:var(--rs);transition:background .2s}
+.btn-ghost:active{background:var(--border)}
+
+/* Auth */
+#auth{background:var(--bg);z-index:180}
+.auth-header{padding:48px 24px 24px;text-align:center}
+.auth-header h2{font-size:24px;font-weight:800;margin-bottom:6px}
+.auth-header p{color:var(--text2);font-size:13px}
+.auth-tabs{display:flex;margin:0 24px;background:var(--bg2);border-radius:var(--rs);padding:4px}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:var(--text2);border-radius:8px;transition:all .3s}
+.auth-tab.active{background:var(--surface-solid);color:var(--primary);box-shadow:var(--shadow)}
+.auth-form{padding:24px;display:flex;flex-direction:column;gap:16px}
+.input-group{position:relative}
+.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}
+.input-group input{width:100%;padding:14px 14px 14px 42px;background:var(--surface);backdrop-filter:blur(12px);border:1.5px solid var(--border);border-radius:var(--rs);font-size:14px;color:var(--text);transition:border-color .3s}
+.input-group input:focus{border-color:var(--primary-light)}
+.input-group .toggle-pw{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}
+.auth-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.auth-row label{display:flex;align-items:center;gap:6px;color:var(--text2);cursor:pointer}
+.auth-row label input{width:16px;height:16px;accent-color:var(--primary)}
+.auth-row a{color:var(--primary);font-weight:600}
+.social-divider{display:flex;align-items:center;gap:12px;color:var(--text3);font-size:12px}
+.social-divider::before,.social-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.social-btns{display:flex;gap:12px;justify-content:center}
+.social-btn{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform .2s,box-shadow .2s}
+.social-btn:active{transform:scale(0.93)}
+.social-btn.g{background:#ea4335;color:#fff}
+.social-btn.f{background:#1877f2;color:#fff}
+.social-btn.a{background:#000;color:#fff}
+.social-btn.b{background:var(--surface);color:var(--text);border:1.5px solid var(--border)}
+.otp-row{display:flex;gap:12px;justify-content:center}
+.otp-input{width:52px;height:56px;text-align:center;font-size:22px;font-weight:700;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);color:var(--text);transition:border-color .3s}
+.otp-input:focus{border-color:var(--primary-light)}
+.resend-row{text-align:center;font-size:13px;color:var(--text2)}
+.resend-row button{color:var(--primary);font-weight:700;font-size:13px}
+
+/* Main App */
+#main-app{position:absolute;inset:0;z-index:100}
+.tab-content{position:absolute;inset:0;padding-bottom:var(--nav-h);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transition:opacity .25s}
+.tab-content.active{opacity:1;pointer-events:all}
+
+/* Home */
+.home-header{padding:16px 20px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.home-greet h1{font-size:20px;font-weight:800}
+.home-greet p{font-size:12px;color:var(--text2);margin-top:2px;display:flex;align-items:center;gap:4px}
+.home-greet p i{color:var(--secondary);font-size:11px}
+.home-actions{display:flex;gap:8px}
+.home-actions button{width:40px;height:40px;border-radius:12px;background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;position:relative;transition:transform .2s}
+.home-actions button:active{transform:scale(0.92)}
+.notif-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:#ef4444;border-radius:50%;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.search-bar{margin:16px 20px 0;position:relative}
+.search-bar input{width:100%;padding:12px 16px 12px 42px;background:var(--surface);backdrop-filter:blur(12px);border:1.5px solid var(--border);border-radius:14px;font-size:13px;color:var(--text);transition:border-color .3s}
+.search-bar input:focus{border-color:var(--primary-light)}
+.search-bar i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}
+.weather-strip{margin:16px 20px 0;padding:12px 16px;background:var(--surface);backdrop-filter:blur(12px);border-radius:var(--rs);border:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.weather-strip i{font-size:24px;color:#f59e0b}
+.weather-strip .wt-info{flex:1}
+.weather-strip .wt-info span{font-size:13px;font-weight:700}
+.weather-strip .wt-info p{font-size:11px;color:var(--text2)}
+.weather-strip .wt-temp{font-size:20px;font-weight:800;color:var(--primary)}
+
+/* Digital ID Card */
+.id-section{padding:20px 20px 0}
+.id-section .section-label{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.id-card-wrap{perspective:1000px;cursor:pointer}
+.id-card-inner{position:relative;width:100%;aspect-ratio:1.586;transition:transform .8s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.id-card-inner.flipped{transform:rotateY(180deg)}
+.id-card-front,.id-card-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;overflow:hidden;padding:20px}
+.id-card-front{background:linear-gradient(135deg,#1e3a8a 0%,#4338ca 40%,#7c3aed 70%,#059669 100%)}
+.id-card-back{background:linear-gradient(135deg,#059669 0%,#7c3aed 40%,#4338ca 70%,#1e3a8a 100%);transform:rotateY(180deg)}
+.id-hologram{position:absolute;inset:0;background:linear-gradient(135deg,transparent 20%,rgba(255,255,255,0.06) 30%,rgba(255,255,255,0.15) 50%,rgba(255,255,255,0.06) 70%,transparent 80%);background-size:200% 200%;animation:shimmer 4s ease-in-out infinite;pointer-events:none;border-radius:18px}
+.id-card-front .id-top{display:flex;justify-content:space-between;align-items:flex-start}
+.id-brand{font-size:11px;font-weight:800;color:rgba(255,255,255,0.9);letter-spacing:1.5px;text-transform:uppercase}
+.id-brand small{display:block;font-size:8px;font-weight:400;letter-spacing:0.5px;opacity:0.7;margin-top:2px}
+.id-nfc{width:28px;height:28px;opacity:0.6}
+.id-chip{width:36px;height:28px;border-radius:5px;background:linear-gradient(135deg,#fbbf24,#f59e0b,#d97706);margin-top:16px;position:relative;overflow:hidden}
+.id-chip::after{content:'';position:absolute;inset:3px;border:1px solid rgba(0,0,0,0.15);border-radius:3px}
+.id-card-front .id-body{display:flex;gap:14px;margin-top:14px;align-items:flex-start}
+.id-photo{width:56px;height:68px;border-radius:8px;border:2px solid rgba(255,255,255,0.3);overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.1)}
+.id-photo img{width:100%;height:100%;object-fit:cover}
+.id-info{flex:1;color:#fff}
+.id-info .id-name{font-size:15px;font-weight:800;margin-bottom:2px}
+.id-info .id-number{font-size:10px;opacity:0.7;font-family:monospace;letter-spacing:1px}
+.id-info .id-meta{display:flex;gap:12px;margin-top:8px;font-size:9px;opacity:0.7}
+.id-info .id-meta span{display:flex;align-items:center;gap:3px}
+.id-card-front .id-bottom{position:absolute;bottom:16px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-end}
+.id-qr-mini{width:48px;height:48px;background:#fff;border-radius:6px;padding:3px}
+.id-qr-mini canvas{width:100%;height:100%}
+.id-verified{display:flex;align-items:center;gap:4px;color:#fff;font-size:9px;font-weight:600;opacity:0.8}
+.id-verified i{color:#10b981;font-size:12px}
+.id-expiry{color:rgba(255,255,255,0.6);font-size:8px;text-align:right}
+.id-expiry span{display:block;font-size:10px;font-weight:600;color:rgba(255,255,255,0.8)}
+.id-card-back{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;color:#fff;text-align:center}
+.id-back-qr{width:120px;height:120px;background:#fff;border-radius:10px;padding:6px;margin-bottom:14px}
+.id-back-qr canvas{width:100%;height:100%}
+.id-back-qr p{font-size:8px;color:var(--text3);margin-top:2px}
+.id-back-info{font-size:11px;line-height:1.8;opacity:0.85}
+.id-back-info strong{font-size:12px}
+.id-back-helpline{margin-top:12px;font-size:12px;font-weight:700;background:rgba(255,255,255,0.15);padding:8px 20px;border-radius:20px}
+
+/* Module Grid */
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px}
+.module-card{border-radius:var(--r);padding:20px 16px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;min-height:120px;display:flex;flex-direction:column;justify-content:flex-end}
+.module-card:active{transform:scale(0.96)}
+.module-card i{font-size:28px;color:#fff;margin-bottom:10px}
+.module-card h3{font-size:14px;font-weight:800;color:#fff}
+.module-card p{font-size:10px;color:rgba(255,255,255,0.8);margin-top:2px}
+.module-card .mod-badge{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.25);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;backdrop-filter:blur(4px)}
+.module-card .mod-bg{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.1)}
+.module-card:nth-child(1){background:var(--grad2);box-shadow:0 6px 24px rgba(30,64,175,0.3)}
+.module-card:nth-child(2){background:var(--grad3);box-shadow:0 6px 24px rgba(5,150,105,0.3)}
+.module-card:nth-child(3){background:var(--grad4);box-shadow:0 6px 24px rgba(124,58,237,0.3)}
+.module-card:nth-child(4){background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 6px 24px rgba(220,38,38,0.3)}
+
+/* List Page */
+.list-page-hdr{padding:16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--bg);z-index:10}
+.list-page-hdr button{width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px}
+.list-page-hdr h2{font-size:18px;font-weight:800}
+.list-items{padding:0 20px 100px;display:flex;flex-direction:column;gap:12px}
+.list-item{display:flex;align-items:center;gap:14px;padding:14px;background:var(--surface);backdrop-filter:blur(12px);border-radius:var(--rs);border:1px solid var(--border);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.list-item:active{transform:scale(0.98);box-shadow:var(--shadow)}
+.list-item .li-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
+.list-item .li-info{flex:1;min-width:0}
+.list-item .li-info h4{font-size:14px;font-weight:700}
+.list-item .li-info p{font-size:11px;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-item .li-arrow{color:var(--text3);font-size:12px}
+
+/* Detail Page */
+.detail-hero{position:relative;height:200px;overflow:hidden}
+.detail-hero img{width:100%;height:100%;object-fit:cover}
+.detail-hero .detail-grad{position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,transparent 60%)}
+.detail-hero .detail-back{position:absolute;top:16px;left:16px;width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;z-index:2}
+.detail-hero .detail-actions{position:absolute;top:16px;right:16px;display:flex;gap:8px;z-index:2}
+.detail-hero .detail-actions button{width:36px;height:36px;border-radius:10px;background:rgba(0,0,0,0.3);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.detail-body{padding:0 20px 100px;margin-top:-30px;position:relative;z-index:2}
+.detail-body h1{font-size:22px;font-weight:900;margin-bottom:6px}
+.detail-body .detail-subtitle{font-size:13px;color:var(--text2);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.detail-body .detail-subtitle .badge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-green{background:rgba(5,150,105,0.12);color:var(--secondary)}
+.badge-blue{background:rgba(30,64,175,0.12);color:var(--primary)}
+.badge-red{background:rgba(220,38,38,0.12);color:#dc2626}
+.badge-amber{background:rgba(245,158,11,0.12);color:#d97706}
+.detail-cards{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.d-card{padding:14px 16px;background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--rs)}
+.d-card .d-card-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.d-card .d-card-value{font-size:13px;font-weight:600;color:var(--text);line-height:1.5}
+.d-card .d-card-row{display:flex;gap:16px;flex-wrap:wrap}
+.d-card .d-card-row div{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.d-card .d-card-row i{color:var(--primary);font-size:13px}
+.detail-desc{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.detail-map{height:140px;border-radius:var(--rs);overflow:hidden;margin-bottom:20px;position:relative;background:var(--bg2)}
+.detail-map img{width:100%;height:100%;object-fit:cover}
+.detail-map .map-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);font-size:28px;color:#ef4444;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))}
+.detail-btns{display:flex;gap:10px;flex-wrap:wrap}
+.detail-btns .dbtn{flex:1;min-width:120px;padding:13px 16px;border-radius:var(--rs);font-size:13px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s}
+.detail-btns .dbtn:active{transform:scale(0.97)}
+.dbtn-primary{background:var(--grad2);color:#fff}
+.dbtn-secondary{background:var(--surface);border:1.5px solid var(--border);color:var(--text)}
+.dbtn-danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
+.dbtn-success{background:var(--grad3);color:#fff}
+
+/* Gallery */
+.gallery-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px;-webkit-overflow-scrolling:touch}
+.gallery-row img{width:140px;height:100px;object-fit:cover;border-radius:var(--rxs);flex-shrink:0}
+.gallery-row::-webkit-scrollbar{display:none}
+
+/* Reviews */
+.review-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.review-item:last-child{border:none}
+.review-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.review-content{flex:1}
+.review-content .rc-top{display:flex;justify-content:space-between;align-items:center}
+.review-content .rc-name{font-size:13px;font-weight:700}
+.review-content .rc-date{font-size:10px;color:var(--text3)}
+.review-content .rc-stars{color:#f59e0b;font-size:10px;margin:3px 0}
+.review-content .rc-text{font-size:12px;color:var(--text2);line-height:1.5}
+
+/* Search Overlay */
+#search-overlay{position:absolute;inset:0;z-index:150;background:var(--bg);transform:translateY(-100%);opacity:0;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#search-overlay.active{transform:translateY(0);opacity:1}
+.search-hdr{padding:16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--bg);z-index:5}
+.search-hdr button{width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;flex-shrink:0}
+.search-hdr .sh-input{flex:1;position:relative}
+.search-hdr .sh-input input{width:100%;padding:11px 40px 11px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;font-size:14px;color:var(--text)}
+.search-hdr .sh-input input:focus{border-color:var(--primary-light)}
+.search-hdr .sh-input .mic-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:14px}
+.search-section{padding:0 20px 100px}
+.search-section h3{font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+.recent-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.recent-chips .chip{padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;transition:background .2s}
+.recent-chips .chip:active{background:var(--border)}
+.search-results{display:flex;flex-direction:column;gap:10px}
+.sr-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border-radius:var(--rs);border:1px solid var(--border);cursor:pointer;transition:transform .2s}
+.sr-item:active{transform:scale(0.98)}
+.sr-item .sr-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
+.sr-item .sr-info{flex:1;min-width:0}
+.sr-item .sr-info h4{font-size:13px;font-weight:700}
+.sr-item .sr-info p{font-size:10px;color:var(--text2)}
+.sr-item .sr-cat{font-size:9px;font-weight:700;color:var(--primary);background:rgba(30,64,175,0.08);padding:3px 8px;border-radius:10px}
+.voice-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.voice-modal.active{opacity:1;pointer-events:all}
+.voice-box{width:200px;height:200px;border-radius:50%;background:var(--grad2);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;position:relative}
+.voice-box i{font-size:40px;margin-bottom:12px;animation:voicePulse 1.5s ease-in-out infinite}
+.voice-box span{font-size:13px;font-weight:600}
+.voice-box::before,.voice-box::after{content:'';position:absolute;inset:-10px;border-radius:50%;border:2px solid rgba(59,130,246,0.3);animation:voiceRing 2s ease-out infinite}
+.voice-box::after{inset:-25px;animation-delay:0.5s;border-color:rgba(59,130,246,0.15)}
+@keyframes voicePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes voiceRing{0%{transform:scale(0.8);opacity:1}100%{transform:scale(1.3);opacity:0}}
+
+/* Notifications */
+.notif-list{padding:20px}
+.notif-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.notif-header h2{font-size:20px;font-weight:800}
+.notif-header button{font-size:12px;color:var(--primary);font-weight:700}
+.notif-filters{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.notif-filters::-webkit-scrollbar{display:none}
+.nf-btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--surface);border:1px solid var(--border);color:var(--text2);transition:all .2s}
+.nf-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.notif-item{display:flex;gap:12px;padding:14px;background:var(--surface);border-radius:var(--rs);border:1px solid var(--border);margin-bottom:10px;position:relative;cursor:pointer;transition:transform .2s}
+.notif-item:active{transform:scale(0.98)}
+.notif-item.unread::before{content:'';position:absolute;top:16px;left:6px;width:6px;height:6px;border-radius:50%;background:var(--primary)}
+.notif-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.notif-content{flex:1}
+.notif-content h4{font-size:13px;font-weight:700}
+.notif-content p{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.notif-content .nc-time{font-size:10px;color:var(--text3);margin-top:4px}
+
+/* Profile */
+.profile-header{text-align:center;padding:32px 20px 20px}
+.profile-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;border:3px solid var(--primary);overflow:hidden;position:relative}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-avatar .pa-edit{position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center}
+.profile-header h2{font-size:20px;font-weight:800}
+.profile-header p{font-size:12px;color:var(--text2)}
+.profile-stats{display:flex;justify-content:center;gap:32px;margin-top:16px;padding:16px;background:var(--surface);border-radius:var(--rs);border:1px solid var(--border);margin:0 20px 20px}
+.profile-stats div{text-align:center}
+.profile-stats div span{display:block;font-size:18px;font-weight:800;color:var(--primary)}
+.profile-stats div small{font-size:10px;color:var(--text3)}
+.profile-menu{padding:0 20px 100px;display:flex;flex-direction:column;gap:6px}
+.pm-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border-radius:var(--rs);border:1px solid var(--border);cursor:pointer;transition:transform .2s}
+.pm-item:active{transform:scale(0.98)}
+.pm-item .pm-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0}
+.pm-item .pm-text{flex:1}
+.pm-item .pm-text h4{font-size:13px;font-weight:700}
+.pm-item .pm-text p{font-size:10px;color:var(--text2)}
+.pm-item .pm-arrow{color:var(--text3);font-size:12px}
+.pm-item.danger .pm-text h4{color:#dc2626}
+
+/* Settings */
+.settings-list{padding:20px 20px 100px}
+.settings-group{margin-bottom:20px}
+.settings-group h3{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;padding-left:4px}
+.setting-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px}
+.setting-item .si-left{display:flex;align-items:center;gap:12px}
+.setting-item .si-left i{font-size:16px;color:var(--primary);width:20px;text-align:center}
+.setting-item .si-left span{font-size:13px;font-weight:600}
+.setting-item .si-right{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.toggle{width:44px;height:24px;border-radius:12px;background:var(--text3);position:relative;cursor:pointer;transition:background .3s}
+.toggle.on{background:var(--primary)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on::after{transform:translateX(20px)}
+
+/* Bottom Nav */
+#bottom-nav{position:absolute;bottom:0;left:0;right:0;height:var(--nav-h);background:var(--surface);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:80;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform .2s;position:relative}
+.nav-item:active{transform:scale(0.9)}
+.nav-item i{font-size:18px;color:var(--text3);transition:color .2s}
+.nav-item span{font-size:10px;font-weight:600;color:var(--text3);transition:color .2s}
+.nav-item.active i{color:var(--primary)}
+.nav-item.active span{color:var(--primary);font-weight:700}
+.nav-item.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:3px;border-radius:0 0 3px 3px;background:var(--primary)}
+
+/* Footer */
+.app-footer{text-align:center;padding:16px 20px 24px;font-size:10px;color:var(--text3)}
+.app-footer strong{color:var(--primary);font-weight:700}
+
+/* Toast */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:var(--bg);padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s;white-space:nowrap;max-width:90%}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Quick Actions */
+.quick-actions{display:flex;gap:10px;padding:0 20px;margin-top:16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.quick-actions::-webkit-scrollbar{display:none}
+.qa-btn{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:64px;cursor:pointer;transition:transform .2s}
+.qa-btn:active{transform:scale(0.92)}
+.qa-btn .qa-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+.qa-btn span{font-size:10px;font-weight:600;color:var(--text2);text-align:center}
+
+/* Terms */
+.terms-content{padding:20px 20px 100px}
+.terms-content h2{font-size:20px;font-weight:800;margin-bottom:16px}
+.terms-content h3{font-size:15px;font-weight:700;margin:16px 0 8px}
+.terms-content p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px}
+
+/* Emergency SOS */
+.sos-btn-wrap{padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.sos-btn{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:800;box-shadow:0 0 0 0 rgba(220,38,38,0.4);animation:sosPulse 2s ease-in-out infinite;cursor:pointer}
+.sos-btn i{font-size:36px;margin-bottom:4px}
+@keyframes sosPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4)}50%{box-shadow:0 0 0 20px rgba(220,38,38,0)}}
+</style>
+</head>
+<body>
+<div id="app">
+<!-- Splash -->
+<div id="splash" class="page active">
+<div class="logo-wrap">
+<div class="logo-ring"></div>
+<div class="logo-ring"></div>
+<div class="logo-icon"><i class="fas fa-city"></i></div>
+</div>
+<h1>Smart Cityzen</h1>
+<p class="tagline">Smart Living Starts Here</p>
+<div class="loader"></div>
+</div>
+
+<!-- Onboarding -->
+<div id="onboarding" class="page hidden">
+<div id="onb-slides"></div>
+</div>
+
+<!-- Auth -->
+<div id="auth" class="page hidden">
+<div id="auth-content"></div>
+</div>
+
+<!-- Main App -->
+<div id="main-app" style="display:none">
+<div id="tab-home" class="tab-content active"></div>
+<div id="tab-explore" class="tab-content"></div>
+<div id="tab-services" class="tab-content"></div>
+<div id="tab-notifications" class="tab-content"></div>
+<div id="tab-profile" class="tab-content"></div>
+<div id="bottom-nav"></div>
+</div>
+
+<!-- Search Overlay -->
+<div id="search-overlay"></div>
+
+<!-- Voice Modal -->
+<div id="voice-modal" class="voice-modal">
+<div class="voice-box">
+<i class="fas fa-microphone"></i>
+<span>Listening...</span>
+</div>
+</div>
+
+<!-- Sub Pages Container -->
+<div id="sub-pages"></div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+/* ========== DATA ========== */
+const CITIZEN = {
+name: 'Abhishek Sharma',
+id: 'SCZ-2024-78542',
+photo: 'https://picsum.photos/seed/abhishek42/200/200',
+bloodGroup: 'B+',
+emergency: '+91 98765 43210',
+address: '42, Emerald Heights, Sector 15, Greenfield City',
+issueDate: '01 Jan 2024',
+expiryDate: '31 Dec 2029',
+tier: 'Gold Citizen',
+email: 'abhishek.sharma@email.com',
+phone: '+91 87654 32109'
+};
+
+const WEATHER = {temp: '28°C', condition: 'Partly Cloudy', humidity: '65%', wind: '12 km/h', city: 'Greenfield City'};
+
+const TAGLINES = ['Smart Living Starts Here','Your City, Digitally Connected','Everything Your City Needs','Explore. Connect. Live.','Your Complete Digital City'];
+
+const CITY_SERVICES = [
+{icon:'fa-droplet',color:'#3b82f6',name:'Water Bill',desc:'Pay and manage your water supply bills online. View consumption history and download receipts.',status:'Active',contact:'+91 1800 123 4567',location:'Municipal Water Board, Block A, Sector 5',timings:'Mon-Sat: 9:00 AM - 5:00 PM',img:'water-bill'},
+{icon:'fa-bolt',color:'#f59e0b',name:'Electricity',desc:'Check electricity bills, submit meter readings, and make payments through secure gateway.',status:'Active',contact:'+91 1800 234 5678',location:'State Electricity Board, Industrial Area',timings:'24/7 Online | Office: Mon-Sat 10 AM - 4 PM',img:'electricity'},
+{icon:'fa-building-columns',color:'#8b5cf6',name:'Property Tax',desc:'Calculate, pay and manage property tax for residential and commercial properties.',status:'Active',contact:'+91 1800 345 6789',location:'City Tax Office, Civic Center, Main Road',timings:'Mon-Fri: 9:00 AM - 4:30 PM',img:'property-tax'},
+{icon:'fa-baby',color:'#ec4899',name:'Birth Certificate',desc:'Apply for new birth certificates, download digital copies, and request corrections.',status:'Active',contact:'+91 1800 456 7890',location:'Registrar Office, District Headquarters',timings:'Mon-Sat: 10:00 AM - 3:00 PM',img:'birth-cert'},
+{icon:'fa-file-lines',color:'#6366f1',name:'Death Certificate',desc:'Apply for death certificates, verify records, and obtain certified copies.',status:'Active',contact:'+91 1800 567 8901',location:'Registrar Office, District Headquarters',timings:'Mon-Sat: 10:00 AM - 3:00 PM',img:'death-cert'},
+{icon:'fa-rings-wedding',color:'#f43f5e',name:'Marriage Certificate',desc:'Register marriages, apply for certificates, and download certified digital copies.',status:'Active',contact:'+91 1800 678 9012',location:'Sub-Registrar Office, Civil Lines',timings:'Mon-Fri: 9:30 AM - 4:00 PM',img:'marriage-cert'},
+{icon:'fa-trash-can',color:'#22c55e',name:'Garbage Collection',desc:'Schedule waste pickup, track collection routes, and report missed pickups.',status:'Active',contact:'+91 1800 789 0123',location:'Solid Waste Management, Sector 8',timings:'Daily: 6:00 AM - 10:00 AM',img:'garbage'},
+{icon:'fa-comment-dots',color:'#06b6d4',name:'Complaints',desc:'File complaints about civic issues, track resolution status, and provide feedback.',status:'Active',contact:'+91 1800 890 1234',location:'Grievance Cell, Municipal Corporation',timings:'24/7 Online | Office: Mon-Sat 9 AM - 5 PM',img:'complaints'},
+{icon:'fa-landmark',color:'#a855f7',name:'Government Offices',desc:'Find contact details, locations, and working hours of all government offices.',status:'Active',contact:'+91 1800 901 2345',location:'Various locations across the city',timings:'Mon-Fri: 9:30 AM - 5:00 PM',img:'govt-office'},
+{icon:'fa-city',color:'#14b8a6',name:'Municipal Services',desc:'Access all municipal services including sanitation, drainage, and road maintenance.',status:'Active',contact:'+91 1800 012 3456',location:'Municipal Corporation, Main Campus',timings:'Mon-Sat: 9:00 AM - 5:00 PM',img:'municipal'},
+{icon:'fa-restroom',color:'#64748b',name:'Public Toilets',desc:'Locate nearby clean public toilets, check availability and hygiene ratings.',status:'Active',contact:'+91 22 2756 7890',location:'Multiple locations across the city',timings:'6:00 AM - 10:00 PM',img:'public-toilet'},
+{icon:'fa-square-parking',color:'#0ea5e9',name:'Parking',desc:'Find parking spots, pay parking fees, and get real-time availability updates.',status:'Active',contact:'+91 1800 111 2233',location:'City Parking Authority, Sector 3',timings:'24/7 Automated',img:'parking'},
+{icon:'fa-lightbulb',color:'#eab308',name:'Street Lights',desc:'Report faulty street lights, track repair status, and request new installations.',status:'Active',contact:'+91 1800 222 3344',location:'Electrical Department, Municipal Corp',timings:'Mon-Sat: 8:00 AM - 4:00 PM',img:'street-light'},
+{icon:'fa-road',color:'#78716c',name:'Road Complaints',desc:'Report potholes, damaged roads, and construction issues for quick resolution.',status:'Active',contact:'+91 1800 333 4455',location:'Roads & Infrastructure Division',timings:'Mon-Sat: 9:00 AM - 5:00 PM',img:'road-complaint'},
+{icon:'fa-faucet-drip',color:'#2563eb',name:'Water Leakage',desc:'Report water leakage, pipe bursts, and supply disruptions for immediate action.',status:'Active',contact:'+91 1800 444 5566',location:'Water Supply Emergency, Sector 5',timings:'24/7 Emergency',img:'water-leak'},
+{icon:'fa-paw',color:'#f97316',name:'Animal Control',desc:'Report stray animal issues, request rescue services, and find pet adoption centers.',status:'Active',contact:'+91 1800 555 6677',location:'Animal Welfare Center, Outer Ring Road',timings:'Mon-Sat: 8:00 AM - 6:00 PM',img:'animal-control'}
+];
+
+const EXPLORE_PLACES = [
+{icon:'fa-monument',color:'#dc2626',name:'Heritage Fort',cat:'Tourist Places',desc:'A magnificent 18th century fort with stunning architecture, museum, and light show every evening.',rating:4.7,reviews:2840,hours:'9:00 AM - 6:00 PM',fee:'Adults: ₹50 | Children: ₹20',phone:'+91 22 2567 8901',address:'Fort Road, Old City',img:'heritage-fort',gallery:['fort1','fort2','fort3']},
+{icon:'fa-utensils',color:'#ea580c',name:'Spice Garden Restaurant',cat:'Restaurants',desc:'Award-winning restaurant serving authentic regional cuisine with rooftop dining and live music.',rating:4.5,reviews:1560,hours:'11:00 AM - 11:00 PM',fee:'Avg. ₹800 for two',phone:'+91 22 3456 7890',address:'MG Road, Downtown',img:'restaurant',gallery:['food1','food2','food3']},
+{icon:'fa-hospital',color:'#ef4444',name:'City General Hospital',cat:'Hospitals',desc:'Multi-specialty hospital with 500+ beds, emergency services, and advanced diagnostic facilities.',rating:4.2,reviews:3200,hours:'24/7 Emergency | OPD: 8 AM - 8 PM',fee:'Varies by department',phone:'+91 22 4567 8901',address:'Medical Campus, Sector 12',img:'hospital',gallery:['hosp1','hosp2']},
+{icon:'fa-school',color:'#2563eb',name:'Delhi Public School',cat:'Schools',desc:'CBSE affiliated senior secondary school with modern infrastructure, sports facilities, and smart classrooms.',rating:4.6,reviews:890,hours:'7:30 AM - 3:00 PM',fee:'Annual: ₹1,20,000',phone:'+91 22 5678 9012',address:'Education Hub, Sector 9',img:'school',gallery:['school1','school2']},
+{icon:'fa-graduation-cap',color:'#7c3aed',name:'National Institute of Technology',cat:'Colleges',desc:'Premier engineering institution offering undergraduate and postgraduate programs in technology.',rating:4.8,reviews:2100,hours:'8:00 AM - 6:00 PM',fee:'Semester: ₹75,000',phone:'+91 22 6789 0123',address:'Tech Park, Outer Ring Road',img:'college',gallery:['college1','college2']},
+{icon:'fa-book-open',color:'#0891b2',name:'Central Public Library',cat:'Libraries',desc:'State-of-the-art library with over 2 lakh books, digital section, reading rooms, and free WiFi.',rating:4.4,reviews:670,hours:'8:00 AM - 9:00 PM',fee:'Free membership',phone:'+91 22 7890 1234',address:'Civic Center, Main Road',img:'library',gallery:['lib1','lib2']},
+{icon:'fa-tree',color:'#16a34a',name:'Emerald Valley Park',cat:'Parks',desc:'Sprawling 50-acre park with jogging tracks, botanical garden, children play area, and amphitheater.',rating:4.6,reviews:4500,hours:'5:00 AM - 9:00 PM',fee:'Free entry',phone:'+91 22 8901 2345',address:'Valley Road, Sector 7',img:'park',gallery:['park1','park2','park3']},
+{icon:'fa-om',color:'#f97316',name:'Shri Mahadev Temple',cat:'Temples',desc:'Ancient temple dedicated to Lord Shiva, known for its intricate carvings and peaceful ambiance.',rating:4.9,reviews:5600,hours:'5:00 AM - 9:00 PM',fee:'Free entry',phone:'+91 22 9012 3456',address:'Temple Street, Old City',img:'temple',gallery:['temple1','temple2']},
+{icon:'fa-mosque',color:'#059669',name:'Jama Masjid',cat:'Mosques',desc:'Historic mosque with beautiful Mughal architecture, peaceful prayer halls, and community center.',rating:4.7,reviews:3200,hours:'5:00 AM - 10:00 PM',fee:'Free entry',phone:'+91 22 0123 4567',address:'Jama Lane, Heritage Area',img:'mosque',gallery:['mosque1']},
+{icon:'fa-church',color:'#8b5cf6',name:'St. Mary\'s Cathedral',cat:'Churches',desc:'Gothic-style cathedral built in 1890, featuring stunning stained glass windows and serene gardens.',rating:4.6,reviews:1800,hours:'6:00 AM - 8:00 PM',fee:'Free entry',phone:'+91 22 1234 5678',address:'Church Road, Civil Lines',img:'church',gallery:['church1','church2']},
+{icon:'fa-bag-shopping',color:'#e11d48',name:'Metro Mall',cat:'Shopping Malls',desc:'Premium shopping destination with 200+ brands, food court, multiplex, and entertainment zone.',rating:4.3,reviews:8900,hours:'10:00 AM - 10:00 PM',fee:'Free entry',phone:'+91 22 2345 6789',address:'Highway Road, Junction Square',img:'mall',gallery:['mall1','mall2','mall3']},
+{icon:'fa-hotel',color:'#0d9488',name:'Grand Palace Hotel',cat:'Hotels',desc:'Five-star luxury hotel with 300 rooms, spa, swimming pool, multiple restaurants, and banquet halls.',rating:4.5,reviews:4200,hours:'24/7',fee:'From ₹8,000/night',phone:'+91 22 3456 7891',address:'VIP Road, City Center',img:'hotel',gallery:['hotel1','hotel2']},
+{icon:'fa-film',color:'#be185d',name:'Cinepolis Multiplex',cat:'Cinema',desc:'Modern 8-screen multiplex with IMAX, Dolby Atmos, recliner seats, and gourmet food counter.',rating:4.4,reviews:6700,hours:'9:00 AM - 11:30 PM',fee:'₹200 - ₹800 per ticket',phone:'+91 22 4567 8912',address:'Metro Mall, 3rd Floor',img:'cinema',gallery:['cinema1','cinema2']},
+{icon:'fa-building',color:'#92400e',name:'City Museum',cat:'Museums',desc:'World-class museum showcasing city history, art gallery, interactive exhibits, and souvenir shop.',rating:4.5,reviews:2300,hours:'10:00 AM - 5:00 PM (Closed Monday)',fee:'Adults: ₹40 | Students: ₹20',phone:'+91 22 5678 9123',address:'Museum Road, Cultural District',img:'museum',gallery:['museum1','museum2']},
+{icon:'fa-bus',color:'#2563eb',name:'Central Bus Stand',cat:'Bus Stand',desc:'Main inter-city and intra-city bus terminal with AC waiting lounge, ticket counters, and food stalls.',rating:3.8,reviews:5400,hours:'24/7',fee:'Varies by route',phone:'+91 22 6789 1234',address:'Station Road, Near Railway Station',img:'bus-stand',gallery:['bus1']},
+{icon:'fa-train',color:'#1d4ed8',name:'Central Railway Station',cat:'Railway Station',desc:'Major railway junction connecting to all major cities. Clean platforms, waiting rooms, and food court.',rating:4.0,reviews:12000,hours:'24/7',fee:'Varies by destination',phone:'+91 22 7890 1235',address:'Station Road, Central Area',img:'railway',gallery:['railway1','railway2']},
+{icon:'fa-plane',color:'#0369a1',name:'Greenfield Airport',cat:'Airport',desc:'International airport with domestic and international terminals, duty-free shops, and lounges.',rating:4.3,reviews:8900,hours:'24/7',fee:'Varies by airline',phone:'+91 22 8901 2346',address:'Airport Road, 20 km from city center',img:'airport',gallery:['airport1','airport2']},
+{icon:'fa-gas-pump',color:'#dc2626',name:'HP Petrol Pump',cat:'Petrol Pumps',desc:'Full-service fuel station with petrol, diesel, CNG, air filling, and convenience store.',rating:4.1,reviews:890,hours:'6:00 AM - 10:00 PM',fee:'Market rates',phone:'+91 22 9012 3457',address:'Highway Road, Junction 4',img:'petrol',gallery:['petrol1']},
+{icon:'fa-charging-station',color:'#16a34a',name:'EV Charge Point',cat:'EV Charging',desc:'Fast EV charging station with CCS2 and Type-2 connectors, waiting lounge, and cafe.',rating:4.2,reviews:340,hours:'24/7',fee:'₹15 per unit',phone:'+91 22 0123 4568',address:'Metro Mall Parking, Basement 2',img:'ev-charge',gallery:['ev1']},
+{icon:'fa-wifi',color:'#6366f1',name:'Public WiFi Zone',cat:'Public WiFi',desc:'Free high-speed WiFi hotspot zones across 50+ locations in the city for all citizens.',rating:4.0,reviews:1200,hours:'24/7',fee:'Free (30 min/day)',phone:'+91 1800 000 1111',location:'Multiple locations',address:'City-wide at parks, stations, malls',img:'wifi',gallery:['wifi1']}
+];
+
+const CITIZEN_SERVICES = [
+{icon:'fa-id-card',color:'#3b82f6',name:'Digital Documents',desc:'Access all your digital documents including Aadhaar, PAN, Driving License, and more in one place.',status:'Available',contact:'+91 1800 100 2000',img:'digital-docs'},
+{icon:'fa-calendar-check',color:'#8b5cf6',name:'Appointments',desc:'Book appointments with government offices, hospitals, and municipal services online.',status:'Available',contact:'+91 1800 200 3000',img:'appointments'},
+{icon:'fa-calendar-days',color:'#ec4899',name:'City Events',desc:'Discover upcoming events, festivals, concerts, exhibitions, and cultural programs in the city.',status:'Active',contact:'+91 1800 300 4000',img:'events'},
+{icon:'fa-briefcase',color:'#f59e0b',name:'Jobs',desc:'Find government and private job listings, apply online, and track application status.',status:'Active',contact:'+91 1800 400 5000',img:'jobs'},
+{icon:'fa-hand-holding-heart',color:'#10b981',name:'Volunteer',desc:'Register as a volunteer for community service, disaster relief, and social welfare programs.',status:'Open',contact:'+91 1800 500 6000',img:'volunteer'},
+{icon:'fa-store',color:'#f97316',name:'Marketplace',desc:'Buy and sell locally. Find local businesses, artisans, farmers market, and home-based services.',status:'Active',contact:'+91 1800 600 7000',img:'marketplace'},
+{icon:'fa-magnifying-glass-location',color:'#06b6d4',name:'Lost & Found',desc:'Report lost items, search found items database, and connect with finders to recover belongings.',status:'Active',contact:'+91 1800 700 8000',img:'lost-found'},
+{icon:'fa-bullhorn',color:'#e11d48',name:'Public Notices',desc:'Stay updated with official government notifications, circulars, and important announcements.',status:'Active',contact:'+91 1800 800 9000',img:'notices'},
+{icon:'fa-square-poll-vertical',color:'#6366f1',name:'Polls & Surveys',desc:'Participate in city planning polls, provide opinions on development projects and policies.',status:'Active',contact:'+91 1800 900 0001',img:'polls'},
+{icon:'fa-lightbulb',color:'#eab308',name:'Suggestions',desc:'Submit your ideas and suggestions for improving city infrastructure, services, and governance.',status:'Open',contact:'+91 1800 000 1002',img:'suggestions'},
+{icon:'fa-heart-pulse',color:'#ef4444',name:'Health Camps',desc:'View upcoming free health check-up camps, vaccination drives, and medical awareness programs.',status:'Scheduled',contact:'+91 1800 100 2003',img:'health-camp'},
+{icon:'fa-droplet',color:'#dc2626',name:'Blood Donation',desc:'Register as blood donor, find blood banks, check availability, and request emergency blood.',status:'Active',contact:'+91 1800 200 3004',img:'blood-donation'},
+{icon:'fa-graduation-cap',color:'#2563eb',name:'Education',desc:'Access educational resources, scholarship information, skill development programs, and online courses.',status:'Available',contact:'+91 1800 300 4005',img:'education'},
+{icon:'fa-award',color:'#059669',name:'Scholarships',desc:'Browse and apply for government and private scholarships for students from all categories.',status:'Open',contact:'+91 1800 400 5006',img:'scholarships'},
+{icon:'fa-futbol',color:'#14b8a6',name:'Sports',desc:'Find sports facilities, book grounds, join leagues, and register for city-level tournaments.',status:'Active',contact:'+91 1800 500 6007',img:'sports'},
+{icon:'fa-people-group',color:'#a855f7',name:'Community Programs',desc:'Join neighborhood groups, community initiatives, cleanup drives, and social welfare activities.',status:'Active',contact:'+91 1800 600 7008',img:'community'}
+];
+
+const EMERGENCY_SERVICES = [
+{icon:'fa-shield-halved',color:'#1d4ed8',name:'Police',desc:'Emergency police assistance for crime, theft, violence, and law enforcement matters.',number:'100',distance:'1.2 km',available:true,status:'Active',address:'Police Station, Main Road',img:'police'},
+{icon:'fa-fire-extinguisher',color:'#dc2626',name:'Fire Department',desc:'Emergency fire response, rescue operations, and fire safety consultation services.',number:'101',distance:'2.5 km',available:true,status:'Active',address:'Fire Station No. 3, Industrial Area',img:'fire'},
+{icon:'fa-truck-medical',color:'#ef4444',name:'Ambulance',desc:'24/7 emergency medical services with advanced life support ambulances and paramedics.',number:'108',distance:'0.8 km',available:true,status:'Active',address:'City EMS Center, Near Hospital',img:'ambulance'},
+{icon:'fa-venus',color:'#be185d',name:'Women\'s Helpline',desc:'Confidential support for women facing harassment, domestic violence, or safety concerns.',number:'1091',distance:'N/A',available:true,status:'24/7',address:'Women Safety Cell, District HQ',img:'women-helpline'},
+{icon:'fa-child',color:'#f97316',name:'Child Helpline',desc:'Emergency helpline for child rights, abuse reporting, rescue, and rehabilitation services.',number:'1098',distance:'N/A',available:true,status:'24/7',address:'Child Welfare Committee, Sector 4',img:'child-helpline'},
+{icon:'fa-house-tsunami',color:'#0ea5e9',name:'Disaster Management',desc:'Coordination and response for natural disasters, evacuations, and emergency relief operations.',number:'1077',distance:'3.0 km',available:true,status:'Standby',address:'DM Control Room, Collector Office',img:'disaster'},
+{icon:'fa-hospital',color:'#16a34a',name:'Nearby Hospitals',desc:'Quick access to nearest hospitals with real-time bed availability and emergency contact numbers.',number:'104',distance:'0.5 km',available:true,status:'Active',address:'Multiple locations',img:'nearby-hospital'},
+{icon:'fa-phone-volume',color:'#7c3aed',name:'Emergency Contacts',desc:'Pre-saved emergency contacts of family, doctors, and important contacts for quick access.',number:'N/A',distance:'N/A',available:true,status:'Saved',address:'Your contact list',img:'emergency-contacts'},
+{icon:'fa-triangle-exclamation',color:'#dc2626',name:'SOS Alert',desc:'One-tap SOS sends your live location to emergency contacts and nearby responders instantly.',number:'SOS',distance:'N/A',available:true,status:'Ready',address:'Activates GPS',img:'sos'},
+{icon:'fa-bell',color:'#eab308',name:'Emergency Alert',desc:'Receive real-time emergency alerts, warnings, and public safety notifications from authorities.',number:'N/A',distance:'N/A',available:true,status:'Monitoring',address:'City-wide',img:'emergency-alert'},
+{icon:'fa-route',color:'#059669',name:'Safe Route',desc:'Find the safest route to your destination avoiding flood-prone, high-crime, or hazardous areas.',number:'N/A',distance:'N/A',available:true,status:'Active',address:'Real-time routing',img:'safe-route'},
+{icon:'fa-water',color:'#2563eb',name:'Flood Warning',desc:'Real-time flood monitoring, river level data, evacuation alerts, and shelter locations.',number:'N/A',distance:'N/A',available:true,status:'Monitoring',address:'River Monitoring Stations',img:'flood-warning'},
+{icon:'fa-cloud-bolt',color:'#6366f1',name:'Weather Alerts',desc:'Severe weather warnings including cyclones, thunderstorms, heat waves, and cold waves.',number:'N/A',distance:'N/A',available:true,status:'Active',address:'Meteorological Department',img:'weather-alert'},
+{icon:'fa-car-burst',color:'#ea580c',name:'Traffic Alerts',desc:'Live traffic updates, road closures, accidents, diversions, and congestion information.',number:'N/A',distance:'N/A',available:true,status:'Live',address:'City Traffic Control',img:'traffic-alert'},
+{icon:'fa-tent',color:'#0d9488',name:'Emergency Shelters',desc:'Locations of emergency shelters, relief camps, and safe houses with capacity and facilities info.',number:'1077',distance:'1.5 km',available:true,status:'Standby',address:'Multiple locations',img:'shelter'},
+{icon:'fa-satellite-dish',color:'#9333ea',name:'City Surveillance',desc:'Access to city CCTV feeds at major junctions, public spaces, and emergency zones.',number:'N/A',distance:'N/A',available:false,status:'Restricted',address:'Control Room, Police HQ',img:'surveillance'}
+];
+
+const NOTIFICATIONS = [
+{icon:'fa-droplet',color:'#3b82f6',title:'Water Bill Due',desc:'Your water bill of ₹850 for March 2024 is due on 15th April. Pay now to avoid late fees.',time:'2 hours ago',unread:true,cat:'bills'},
+{icon:'fa-bolt',color:'#f59e0b',title:'Power Outage Alert',desc:'Scheduled maintenance in Sector 15 on April 12, 10 AM - 2 PM. Please plan accordingly.',time:'5 hours ago',unread:true,cat:'alerts'},
+{icon:'fa-calendar-days',color:'#ec4899',title:'City Festival This Weekend',desc:'Annual Greenfield Festival at Emerald Valley Park. Cultural programs, food stalls, and fireworks.',time:'1 day ago',unread:true,cat:'events'},
+{icon:'fa-road',color:'#78716c',title:'Road Repair Completed',desc:'Your complaint regarding potholes on MG Road has been resolved. Rate the service.',time:'1 day ago',unread:false,cat:'updates'},
+{icon:'fa-heart-pulse',color:'#ef4444',title:'Free Health Camp Tomorrow',desc:'Free health check-up camp at Community Center, Sector 9. 8 AM - 2 PM. All citizens welcome.',time:'2 days ago',unread:false,cat:'events'},
+{icon:'fa-shield-halved',color:'#1d4ed8',title:'Safety Advisory',desc:'Heavy rainfall expected in next 48 hours. Avoid low-lying areas and keep emergency numbers handy.',time:'2 days ago',unread:false,cat:'alerts'},
+{icon:'fa-award',color:'#059669',title:'Scholarship Application Approved',desc:'Your scholarship application for academic year 2024-25 has been approved. Amount: ₹50,000.',time:'3 days ago',unread:false,cat:'updates'},
+{icon:'fa-bus',color:'#2563eb',title:'New Bus Route Launched',desc:'Route 42A now connects Sector 15 to Airport Road. Buses every 20 minutes from 6 AM to 10 PM.',time:'4 days ago',unread:false,cat:'updates'},
+{icon:'fa-futbol',color:'#14b8a6',title:'Sports Tournament Registration',desc:'City-level Cricket Tournament registrations open. Last date: April 20. Teams of 15 players.',time:'5 days ago',unread:false,cat:'events'},
+{icon:'fa-file-lines',color:'#8b5cf6',title:'Property Tax Receipt',desc:'Your property tax payment receipt for FY 2024-25 is ready for download.',time:'1 week ago',unread:false,cat:'bills'}
+];
+
+const RECENT_SEARCHES = ['Water Bill','Heritage Fort','Police','Blood Donation','Metro Mall'];
+const TRENDING_SEARCHES = ['City Festival','EV Charging','Jobs','Health Camp','Parking','Scholarships'];
+
+/* ========== STATE ========== */
+let currentPage = 'splash';
+let currentTab = 'home';
+let subPageStack = [];
+let onbIndex = 0;
+let authView = 'login';
+let idFlipped = false;
+let notifFilter = 'all';
+let isDark = false;
+let savedItems = new Set();
+
+/* ========== UTILITIES ========== */
+function $(sel, parent) { return (parent || document).querySelector(sel); }
+function $$(sel, parent) { return (parent || document).querySelectorAll(sel); }
+function getImage(seed, w, h) { return `https://picsum.photos/seed/${seed}/${w||400}/${h||300}`; }
+
+function showToast(msg) {
+const t = $('#toast');
+t.textContent = msg;
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function drawQR(canvas, size) {
+if (!canvas) return;
+canvas.width = size || 120;
+canvas.height = size || 120;
+const ctx = canvas.getContext('2d');
+const s = canvas.width;
+const m = s * 0.08;
+const cs = (s - m * 2) / 25;
+ctx.fillStyle = '#fff';
+ctx.fillRect(0, 0, s, s);
+ctx.fillStyle = '#1e293b';
+function drawFinder(x, y) {
+const fs = cs * 7;
+ctx.fillRect(x, y, fs, fs);
+ctx.fillStyle = '#fff';
+ctx.fillRect(x + cs, y + cs, cs * 5, cs * 5);
+ctx.fillStyle = '#1e293b';
+ctx.fillRect(x + cs * 2, y + cs * 2, cs * 3, cs * 3);
+}
+drawFinder(m, m);
+drawFinder(s - m - cs * 7, m);
+drawFinder(m, s - m - cs * 7);
+for (let r = 0; r < 25; r++) {
+for (let c = 0; c < 25; c++) {
+if ((r < 8 && c < 8) || (r < 8 && c > 16) || (r > 16 && c < 8)) continue;
+if (Math.random() > 0.55) {
+ctx.fillRect(m + c * cs, m + r * cs, cs, cs);
+}
+}
+}
+}
+
+function drawBarcode(container) {
+if (!container) return;
+container.innerHTML = '';
+const w = container.offsetWidth || 200;
+const h = 36;
+const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+svg.setAttribute('width', w);
+svg.setAttribute('height', h);
+svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+let x = 0;
+while (x < w) {
+const bw = Math.random() > 0.5 ? (Math.random() > 0.5 ? 2 : 3) : 1;
+if (Math.random() > 0.4) {
+const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+rect.setAttribute('x', x);
+rect.setAttribute('y', 0);
+rect.setAttribute('width', bw);
+rect.setAttribute('height', h);
+rect.setAttribute('fill', '#fff');
+svg.appendChild(rect);
+}
+x += bw + (Math.random() > 0.5 ? 1 : 0.5);
+}
+container.appendChild(svg);
+}
+
+function getGreeting() {
+const h = new Date().getHours();
+if (h < 12) return 'Good Morning';
+if (h < 17) return 'Good Afternoon';
+return 'Good Evening';
+}
+
+function formatDate() {
+const d = new Date();
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+function getTimeAgo(idx) {
+return NOTIFICATIONS[idx] ? NOTIFICATIONS[idx].time : '';
+}
+
+/* ========== NAVIGATION ========== */
+function showPage(id) {
+ $$('.page').forEach(p => { p.classList.remove('active'); p.classList.add('hidden'); });
+const page = $('#' + id);
+if (page) { page.classList.remove('hidden'); page.classList.add('active'); }
+currentPage = id;
+}
+
+function switchTab(tab) {
+currentTab = tab;
+ $$('.tab-content').forEach(t => t.classList.remove('active'));
+const el = $('#tab-' + tab);
+if (el) el.classList.add('active');
+ $$('.nav-item').forEach(n => n.classList.remove('active'));
+const navItem = $(`.nav-item[data-tab="${tab}"]`);
+if (navItem) navItem.classList.add('active');
+}
+
+function openSubPage(html) {
+const div = document.createElement('div');
+div.className = 'sub-page';
+div.innerHTML = html;
+ $('#sub-pages').appendChild(div);
+requestAnimationFrame(() => { requestAnimationFrame(() => { div.classList.add('active'); }); });
+subPageStack.push(div);
+}
+
+function goBack() {
+if (subPageStack.length === 0) return;
+const top = subPageStack.pop();
+top.classList.remove('active');
+top.classList.add('exiting');
+setTimeout(() => top.remove(), 400);
+}
+
+function openSearch() {
+const overlay = $('#search-overlay');
+overlay.classList.add('active');
+setTimeout(() => { const inp = $('input', overlay); if (inp) inp.focus(); }, 350);
+}
+
+function closeSearch() {
+ $('#search-overlay').classList.remove('active');
+}
+
+/* ========== SPLASH ========== */
+function initSplash() {
+document.querySelector('#splash .tagline').textContent = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
+setTimeout(() => { showPage('onboarding'); initOnboarding(); }, 2800);
+}
+
+/* ========== ONBOARDING ========== */
+function initOnboarding() {
+const slides = $('#onb-slides');
+slides.innerHTML = `
+<div class="onb-slide center" data-idx="0">
+<div class="onb-illust">
+<svg viewBox="0 0 220 220" fill="none"><rect x="20" y="80" width="40" height="100" rx="4" fill="#1e40af" opacity="0.8"/><rect x="70" y="50" width="40" height="130" rx="4" fill="#3b82f6" opacity="0.9"/><rect x="120" y="90" width="40" height="90" rx="4" fill="#7c3aed" opacity="0.8"/><rect x="160" y="60" width="30" height="120" rx="4" fill="#059669" opacity="0.7"/><circle cx="90" cy="40" r="8" fill="#f59e0b"/><circle cx="40" cy="60" r="5" fill="#f59e0b" opacity="0.6"/><path d="M30 180 Q60 160 90 175 Q120 190 150 170 Q180 150 200 165" stroke="#3b82f6" stroke-width="2" fill="none" opacity="0.4"/><circle cx="55" cy="170" r="3" fill="#3b82f6" opacity="0.6"/><circle cx="135" cy="175" r="3" fill="#7c3aed" opacity="0.6"/></svg>
+</div>
+<h2 class="onb-title">Your Smart City in Your Pocket</h2>
+<p class="onb-desc">Access all city services, pay bills, explore places, and stay connected with your city government — all from one app.</p>
+<div class="onb-dots"><div class="onb-dot active"></div><div class="onb-dot"></div><div class="onb-dot"></div></div>
+<div class="onb-actions"><button class="btn-ghost" onclick="skipOnboarding()">Skip</button><button class="btn-primary" onclick="nextOnb()">Next</button></div>
+</div>
+<div class="onb-slide right" data-idx="1">
+<div class="onb-illust">
+<svg viewBox="0 0 220 220" fill="none"><rect x="50" y="70" width="120" height="80" rx="12" fill="#e8edf5" stroke="#1e40af" stroke-width="2"/><rect x="60" y="82" width="50" height="8" rx="4" fill="#1e40af" opacity="0.6"/><rect x="60" y="96" width="100" height="4" rx="2" fill="#94a3b8"/><rect x="60" y="106" width="80" height="4" rx="2" fill="#94a3b8"/><rect x="60" y="120" width="30" height="20" rx="6" fill="#1e40af"/><circle cx="160" cy="50" r="20" fill="#059669" opacity="0.15"/><circle cx="160" cy="50" r="12" fill="#059669"/><path d="M155 50 L158 53 L166 45" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="40" cy="100" r="15" fill="#7c3aed" opacity="0.15"/><circle cx="40" cy="100" r="8" fill="#7c3aed"/><path d="M37 100 L40 103 L44 97" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+</div>
+<h2 class="onb-title">Digital Citizen Identity</h2>
+<p class="onb-desc">Get your premium Smart Cityzen Digital ID — a secure, verified identity for all city transactions and services.</p>
+<div class="onb-dots"><div class="onb-dot"></div><div class="onb-dot active"></div><div class="onb-dot"></div></div>
+<div class="onb-actions"><button class="btn-ghost" onclick="skipOnboarding()">Skip</button><button class="btn-primary" onclick="nextOnb()">Next</button></div>
+</div>
+<div class="onb-slide right" data-idx="2">
+<div class="onb-illust">
+<svg viewBox="0 0 220 220" fill="none"><circle cx="110" cy="90" r="40" fill="#1e40af" opacity="0.1"/><circle cx="110" cy="90" r="28" fill="#1e40af" opacity="0.15"/><circle cx="110" cy="90" r="16" fill="#1e40af" opacity="0.3"/><circle cx="110" cy="90" r="6" fill="#1e40af"/><circle cx="55" cy="140" r="20" fill="#059669" opacity="0.15"/><path d="M48 140 L55 147 L62 133" stroke="#059669" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="165" cy="140" r="20" fill="#7c3aed" opacity="0.15"/><path d="M158 140 L165 147 L172 133" stroke="#7c3aed" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="75" y1="90" x2="90" y2="90" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3 3"/><line x1="130" y1="90" x2="145" y2="90" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="3 3"/><line x1="110" y1="130" x2="110" y2="118" stroke="#059669" stroke-width="1.5" stroke-dasharray="3 3"/><line x1="110" y1="62" x2="110" y2="50" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="3 3"/></svg>
+</div>
+<h2 class="onb-title">Stay Connected, Stay Safe</h2>
+<p class="onb-desc">Emergency alerts, real-time notifications, community programs, and smart city features that keep you informed and safe.</p>
+<div class="onb-dots"><div class="onb-dot"></div><div class="onb-dot"></div><div class="onb-dot active"></div></div>
+<div class="onb-actions"><button class="btn-ghost" onclick="prevOnb()">Back</button><button class="btn-primary" onclick="skipOnboarding()">Get Started</button></div>
+</div>`;
+onbIndex = 0;
+}
+
+function nextOnb() {
+if (onbIndex >= 2) return;
+const slides = $$('.onb-slide');
+slides[onbIndex].classList.remove('center');
+slides[onbIndex].classList.add('left');
+onbIndex++;
+slides[onbIndex].classList.remove('right');
+slides[onbIndex].classList.add('center');
+}
+
+function prevOnb() {
+if (onbIndex <= 0) return;
+const slides = $$('.onb-slide');
+slides[onbIndex].classList.remove('center');
+slides[onbIndex].classList.add('right');
+onbIndex--;
+slides[onbIndex].classList.remove('left');
+slides[onbIndex].classList.add('center');
+}
+
+function skipOnboarding() {
+showPage('auth');
+initAuth();
+}
+
+/* ========== AUTH ========== */
+function initAuth() { renderAuth('login'); }
+
+function renderAuth(view) {
+authView = view;
+const c = $('#auth-content');
+if (view === 'login' || view === 'signup') {
+c.innerHTML = `
+<div class="auth-header">
+<h2>${view === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
+<p>${view === 'login' ? 'Sign in to your Smart Cityzen account' : 'Join Smart Cityzen today'}</p>
+</div>
+<div class="auth-tabs">
+<button class="auth-tab ${view === 'login' ? 'active' : ''}" onclick="renderAuth('login')">Login</button>
+<button class="auth-tab ${view === 'signup' ? 'active' : ''}" onclick="renderAuth('signup')">Sign Up</button>
+</div>
+<form class="auth-form" onsubmit="handleAuth(event,'${view}')">
+ ${view === 'signup' ? '<div class="input-group"><i class="fas fa-user"></i><input type="text" placeholder="Full Name" required id="auth-name"></div>' : ''}
+<div class="input-group"><i class="fas fa-envelope"></i><input type="email" placeholder="Email Address" required id="auth-email"></div>
+<div class="input-group"><i class="fas fa-lock"></i><input type="${view === 'login' ? 'password' : 'password'}" placeholder="Password" required id="auth-pw" minlength="6"><button type="button" class="toggle-pw" onclick="togglePw(this)"><i class="fas fa-eye"></i></button></div>
+ ${view === 'signup' ? '<div class="input-group"><i class="fas fa-lock"></i><input type="password" placeholder="Confirm Password" required id="auth-cpw" minlength="6"><button type="button" class="toggle-pw" onclick="togglePw(this)"><i class="fas fa-eye"></i></button></div>' : ''}
+ ${view === 'login' ? '<div class="auth-row"><label><input type="checkbox" checked> Remember me</label><a href="#" onclick="renderAuth(\'forgot\');return false">Forgot Password?</a></div>' : '<div class="auth-row"><label><input type="checkbox" required> I agree to the <a href="#" onclick="openTerms();return false" style="color:var(--primary);font-weight:600">Terms & Privacy Policy</a></label></div>'}
+<button type="submit" class="btn-primary" style="margin-top:4px">${view === 'login' ? 'Sign In' : 'Create Account'}</button>
+</form>
+<div style="padding:0 24px"><div class="social-divider">or continue with</div></div>
+<div class="social-btns" style="padding:16px 24px">
+<button class="social-btn g" onclick="socialLogin('Google')"><i class="fab fa-google"></i></button>
+<button class="social-btn f" onclick="socialLogin('Facebook')"><i class="fab fa-facebook-f"></i></button>
+<button class="social-btn a" onclick="socialLogin('Apple')"><i class="fab fa-apple"></i></button>
+<button class="social-btn b" onclick="biometricLogin()"><i class="fas fa-fingerprint"></i></button>
+</div>
+ ${view === 'login' ? '<div style="text-align:center;padding:0 24px 32px"><button style="font-size:13px;color:var(--text2);font-weight:600" onclick="guestLogin()"><i class="fas fa-user-secret" style="margin-right:4px"></i> Continue as Guest</button></div>' : ''}`;
+} else if (view === 'forgot') {
+c.innerHTML = `
+<div class="auth-header"><h2>Forgot Password</h2><p>Enter your email to receive a reset link</p></div>
+<form class="auth-form" onsubmit="handleForgot(event)">
+<div class="input-group"><i class="fas fa-envelope"></i><input type="email" placeholder="Registered Email Address" required id="forgot-email"></div>
+<button type="submit" class="btn-primary">Send Reset Link</button>
+</form>
+<div style="text-align:center;padding:16px 24px"><button class="btn-ghost" onclick="renderAuth('login')"><i class="fas fa-arrow-left" style="margin-right:6px"></i>Back to Login</button></div>`;
+} else if (view === 'reset') {
+c.innerHTML = `
+<div class="auth-header"><h2>Reset Password</h2><p>Enter your new password</p></div>
+<form class="auth-form" onsubmit="handleReset(event)">
+<div class="input-group"><i class="fas fa-lock"></i><input type="password" placeholder="New Password" required id="reset-pw" minlength="6"><button type="button" class="toggle-pw" onclick="togglePw(this)"><i class="fas fa-eye"></i></button></div>
+<div class="input-group"><i class="fas fa-lock"></i><input type="password" placeholder="Confirm New Password" required id="reset-cpw" minlength="6"><button type="button" class="toggle-pw" onclick="togglePw(this)"><i class="fas fa-eye"></i></button></div>
+<button type="submit" class="btn-primary">Update Password</button>
+</form>`;
+} else if (view === 'otp') {
+c.innerHTML = `
+<div class="auth-header"><h2>Verify OTP</h2><p>Enter the 4-digit code sent to your email</p></div>
+<form class="auth-form" onsubmit="handleOtp(event)" style="align-items:center">
+<div class="otp-row">
+<input type="text" maxlength="1" class="otp-input" oninput="otpNext(this)" onkeydown="otpBack(event,this)">
+<input type="text" maxlength="1" class="otp-input" oninput="otpNext(this)" onkeydown="otpBack(event,this)">
+<input type="text" maxlength="1" class="otp-input" oninput="otpNext(this)" onkeydown="otpBack(event,this)">
+<input type="text" maxlength="1" class="otp-input" oninput="otpNext(this)" onkeydown="otpBack(event,this)">
+</div>
+<div class="resend-row" style="margin-top:16px">Didn't receive code? <button type="button" id="resend-btn" onclick="resendOtp()">Resend</button></div>
+<button type="submit" class="btn-primary" style="margin-top:16px;width:100%">Verify & Continue</button>
+</form>`;
+setTimeout(() => { const first = $('.otp-input'); if (first) first.focus(); }, 300);
+}
+}
+
+function togglePw(btn) {
+const inp = btn.parentElement.querySelector('input');
+const icon = btn.querySelector('i');
+if (inp.type === 'password') { inp.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+else { inp.type = 'password'; icon.className = 'fas fa-eye'; }
+}
+
+function otpNext(inp) {
+if (inp.value.length === 1) { const next = inp.nextElementSibling; if (next) next.focus(); }
+}
+
+function otpBack(e, inp) {
+if (e.key === 'Backspace' && !inp.value) { const prev = inp.previousElementSibling; if (prev) prev.focus(); }
+}
+
+function handleAuth(e, type) {
+e.preventDefault();
+if (type === 'signup') {
+const cpw = $('#auth-cpw');
+if (cpw && $('#auth-pw').value !== cpw.value) { showToast('Passwords do not match'); return; }
+}
+showToast('Verifying credentials...');
+setTimeout(() => { renderAuth('otp'); }, 800);
+}
+
+function handleForgot(e) { e.preventDefault(); showToast('Reset link sent to your email'); setTimeout(() => renderAuth('otp'), 1000); }
+function handleReset(e) { e.preventDefault(); const p = $('#reset-pw'), c = $('#reset-cpw'); if (p.value !== c.value) { showToast('Passwords do not match'); return; } showToast('Password updated successfully'); setTimeout(() => enterApp(), 800); }
+function handleOtp(e) { e.preventDefault(); showToast('Verification successful'); setTimeout(() => enterApp(), 600); }
+function resendOtp() { const b = $('#resend-btn'); b.disabled = true; b.textContent = 'Resend in 30s'; let t = 30; const iv = setInterval(() => { t--; b.textContent = `Resend in ${t}s`; if (t <= 0) { clearInterval(iv); b.disabled = false; b.textContent = 'Resend'; } }, 1000); showToast('OTP resent'); }
+function socialLogin(provider) { showToast(`Signing in with ${provider}...`); setTimeout(() => enterApp(), 1000); }
+function biometricLogin() { showToast('Biometric authentication...'); setTimeout(() => enterApp(), 1200); }
+function guestLogin() { showToast('Continuing as guest'); setTimeout(() => enterApp(), 600); }
+
+/* ========== ENTER APP ========== */
+function enterApp() {
+ $('#splash').style.display = 'none';
+ $('#onboarding').style.display = 'none';
+ $('#auth').style.display = 'none';
+ $('#main-app').style.display = 'block';
+renderBottomNav();
+renderHome();
+renderExploreTab();
+renderServicesTab();
+renderNotificationsTab();
+renderProfileTab();
+renderSearchOverlay();
+}
+
+/* ========== BOTTOM NAV ========== */
+function renderBottomNav() {
+ $('#bottom-nav').innerHTML = `
+<div class="nav-item active" data-tab="home" onclick="switchTab('home')"><i class="fas fa-house"></i><span>Home</span></div>
+<div class="nav-item" data-tab="explore" onclick="switchTab('explore')"><i class="fas fa-compass"></i><span>Explore</span></div>
+<div class="nav-item" data-tab="services" onclick="switchTab('services')"><i class="fas fa-grid-2"></i><span>Services</span></div>
+<div class="nav-item" data-tab="notifications" onclick="switchTab('notifications')"><i class="fas fa-bell"></i><span>Alerts</span></div>
+<div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></div>`;
+}
+
+/* ========== HOME ========== */
+function renderHome() {
+const quickActions = [
+{icon:'fa-droplet',color:'#3b82f6',name:'Water'},
+{icon:'fa-bolt',color:'#f59e0b',name:'Electricity'},
+{icon:'fa-car',color:'#059669',name:'Parking'},
+{icon:'fa-hospital',color:'#ef4444',name:'Hospital'},
+{icon:'fa-bus',color:'#2563eb',name:'Transport'},
+{icon:'fa-phone',color:'#dc2626',name:'Emergency'}
+];
+ $('#tab-home').innerHTML = `
+<div class="home-header">
+<div class="home-greet">
+<h1>${getGreeting()}, ${CITIZEN.name.split(' ')[0]} <span style="font-size:22px">&#128075;</span></h1>
+<p><i class="fas fa-location-dot"></i> ${WEATHER.city} &bull; ${formatDate()}</p>
+</div>
+<div class="home-actions">
+<button onclick="openSearch()"><i class="fas fa-magnifying-glass"></i></button>
+<button onclick="switchTab('notifications')"><i class="fas fa-bell"></i><span class="notif-badge">3</span></button>
+<button onclick="switchTab('profile')"><i class="fas fa-user-circle"></i></button>
+</div>
+</div>
+<div class="search-bar" onclick="openSearch()" style="cursor:pointer">
+<i class="fas fa-magnifying-glass"></i>
+<input type="text" placeholder="Search services, places, more..." readonly>
+</div>
+<div class="weather-strip">
+<i class="fas fa-cloud-sun"></i>
+<div class="wt-info"><span>${WEATHER.condition}</span><p>Humidity: ${WEATHER.humidity} | Wind: ${WEATHER.wind}</p></div>
+<div class="wt-temp">${WEATHER.temp}</div>
+</div>
+<div class="quick-actions">
+ ${quickActions.map(a => `
+<div class="qa-btn" onclick="openQuickAction('${a.name}')">
+<div class="qa-icon" style="background:${a.color}"><i class="fas ${a.icon}"></i></div>
+<span>${a.name}</span>
+</div>`).join('')}
+</div>
+<div class="id-section">
+<div class="section-label">Digital Citizen ID</div>
+<div class="id-card-wrap" onclick="flipIdCard()">
+<div class="id-card-inner" id="id-card-inner">
+<div class="id-card-front">
+<div class="id-hologram"></div>
+<div class="id-top">
+<div class="id-brand">SMART CITYZEN<small>Digital Citizen Identity</small></div>
+<svg class="id-nfc" viewBox="0 0 28 28" fill="none"><path d="M4 20C8 16 12 12 16 8" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><path d="M7 23C11 19 15 15 19 11" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/><path d="M1 17C5 13 9 9 13 5" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/></svg>
+</div>
+<div class="id-chip"></div>
+<div class="id-body">
+<div class="id-photo"><img src="${CITIZEN.photo}" alt="Photo"></div>
+<div class="id-info">
+<div class="id-name">${CITIZEN.name}</div>
+<div class="id-number">${CITIZEN.id}</div>
+<div class="id-meta">
+<span><i class="fas fa-droplet"></i> ${CITIZEN.bloodGroup}</span>
+<span><i class="fas fa-phone"></i> ${CITIZEN.emergency}</span>
+<span><i class="fas fa-star"></i> ${CITIZEN.tier}</span>
+</div>
+</div>
+</div>
+<div class="id-bottom">
+<div class="id-qr-mini"><canvas id="qr-mini"></canvas></div>
+<div class="id-expiry">VALID THRU<span>${CITIZEN.expiryDate}</span></div>
+<div class="id-verified"><i class="fas fa-circle-check"></i> Verified Citizen</div>
+</div>
+</div>
+<div class="id-card-back">
+<div class="id-hologram"></div>
+<div class="id-back-qr"><canvas id="qr-back"></canvas></div>
+<div class="id-back-info">
+<strong>${CITIZEN.name}</strong><br>
+ ${CITIZEN.address}<br>
+Emergency: ${CITIZEN.emergency}<br>
+Issued: ${CITIZEN.issueDate}
+</div>
+<div class="id-back-helpline"><i class="fas fa-phone"></i> City Helpline: 1800-SCZ-HELP</div>
+</div>
+</div>
+</div>
+</div>
+<div style="padding:4px 20px 0"><div class="section-label">City Modules</div></div>
+<div class="module-grid">
+<div class="module-card" onclick="openModuleList('city-services')">
+<div class="mod-bg"></div>
+<span class="mod-badge">16 Services</span>
+<i class="fas fa-city"></i>
+<h3>City Services</h3>
+<p>Bills, certificates & more</p>
+</div>
+<div class="module-card" onclick="openModuleList('explore')">
+<div class="mod-bg"></div>
+<span class="mod-badge">20 Places</span>
+<i class="fas fa-compass"></i>
+<h3>Explore City</h3>
+<p>Places, food & culture</p>
+</div>
+<div class="module-card" onclick="openModuleList('citizen')">
+<div class="mod-bg"></div>
+<span class="mod-badge">16 Services</span>
+<i class="fas fa-users"></i>
+<h3>Citizen Services</h3>
+<p>Documents, events & jobs</p>
+</div>
+<div class="module-card" onclick="openModuleList('emergency')">
+<div class="mod-bg"></div>
+<span class="mod-badge">SOS Ready</span>
+<i class="fas fa-shield-halved"></i>
+<h3>Emergency</h3>
+<p>Police, fire & ambulance</p>
+</div>
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+setTimeout(() => {
+drawQR($('#qr-mini'), 48);
+drawQR($('#qr-back'), 120);
+}, 100);
+}
+
+function flipIdCard() {
+const card = $('#id-card-inner');
+if (!card) return;
+idFlipped = !idFlipped;
+card.classList.toggle('flipped', idFlipped);
+}
+
+function openQuickAction(name) {
+const map = { Water: 0, Electricity: 1, Parking: 11, Hospital: 2, Transport: 14, Emergency: 0 };
+if (name === 'Emergency') { openModuleList('emergency'); return; }
+if (name === 'Transport') { switchTab('explore'); return; }
+openModuleList('city-services', map[name] || 0);
+}
+
+/* ========== MODULE LISTS ========== */
+function openModuleList(type, scrollTo) {
+let items, title, iconClass;
+if (type === 'city-services') { items = CITY_SERVICES; title = 'City Services'; iconClass = 'fa-city'; }
+else if (type === 'explore') { items = EXPLORE_PLACES; title = 'Explore City'; iconClass = 'fa-compass'; }
+else if (type === 'citizen') { items = CITIZEN_SERVICES; title = 'Citizen Services'; iconClass = 'fa-users'; }
+else if (type === 'emergency') { items = EMERGENCY_SERVICES; title = 'Emergency & Utilities'; iconClass = 'fa-shield-halved'; }
+
+let extra = '';
+if (type === 'emergency') {
+extra = `<div class="sos-btn-wrap">
+<button class="sos-btn" onclick="showToast('SOS Alert Sent! Location shared with emergency contacts.')">
+<i class="fas fa-phone-volume"></i>
+SOS
+</button>
+<p style="font-size:12px;color:var(--text2);text-align:center">Tap to send emergency alert with your live location</p>
+</div>`;
+}
+
+const html = `
+<div class="list-page-hdr"><button onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>${title}</h2></div>
+ ${extra}
+<div class="list-items">
+ ${items.map((item, i) => `
+<div class="list-item" onclick="openDetail('${type}',${i})">
+<div class="li-icon" style="background:${item.color}"><i class="fas ${item.icon}"></i></div>
+<div class="li-info">
+<h4>${item.name}</h4>
+<p>${item.desc ? item.desc.substring(0, 60) + '...' : (item.address || item.number || '')}</p>
+</div>
+<i class="fas fa-chevron-right li-arrow"></i>
+</div>`).join('')}
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+openSubPage(html);
+if (scrollTo !== undefined) {
+setTimeout(() => {
+const items_container = $('.list-items', subPageStack[subPageStack.length - 1]);
+if (items_container) {
+const target = items_container.children[scrollTo];
+if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+}, 450);
+}
+}
+
+/* ========== DETAIL PAGE ========== */
+function openDetail(type, idx) {
+let item, isExplore = false, isEmergency = false;
+if (type === 'city-services') item = CITY_SERVICES[idx];
+else if (type === 'explore') { item = EXPLORE_PLACES[idx]; isExplore = true; }
+else if (type === 'citizen') item = CITIZEN_SERVICES[idx];
+else if (type === 'emergency') { item = EMERGENCY_SERVICES[idx]; isEmergency = true; }
+
+const saved = savedItems.has(`${type}-${idx}`);
+
+let galleryHtml = '';
+if (isExplore && item.gallery) {
+galleryHtml = `<div class="gallery-row">${item.gallery.map(g => `<img src="${getImage(g, 280, 200)}" alt="${item.name}">`).join('')}</div>`;
+}
+
+let reviewsHtml = '';
+if (isExplore && item.rating) {
+const reviewers = [
+{name:'Priya Patel',avatar:'priya22',stars:5,text:'Excellent place! Very well maintained and the staff is friendly. Highly recommend visiting.',date:'2 days ago'},
+{name:'Rahul Verma',avatar:'rahul55',stars:4,text:'Good experience overall. Could improve on a few things but definitely worth a visit.',date:'1 week ago'},
+{name:'Sneha Kulkarni',avatar:'sneha88',stars:5,text:'One of the best in the city. We had an amazing time here. Will visit again!',date:'2 weeks ago'}
+];
+reviewsHtml = `<div class="d-card"><div class="d-card-label">Reviews & Ratings</div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+<div style="font-size:28px;font-weight:900;color:var(--primary)">${item.rating}</div>
+<div><div style="color:#f59e0b;font-size:12px">${'<i class="fas fa-star"></i>'.repeat(Math.floor(item.rating))}${item.rating % 1 ? '<i class="fas fa-star-half-stroke"></i>' : ''}</div><div style="font-size:11px;color:var(--text3)">${item.reviews.toLocaleString()} reviews</div></div>
+</div>
+ ${reviewers.map(r => `
+<div class="review-item">
+<img class="review-avatar" src="${getImage(r.avatar, 72, 72)}" alt="${r.name}">
+<div class="review-content">
+<div class="rc-top"><span class="rc-name">${r.name}</span><span class="rc-date">${r.date}</span></div>
+<div class="rc-stars">${'<i class="fas fa-star"></i>'.repeat(r.stars)}${'<i class="far fa-star"></i>'.repeat(5 - r.stars)}</div>
+<p class="rc-text">${r.text}</p>
+</div>
+</div>`).join('')}
+</div>`;
+}
+
+let extraInfo = '';
+if (isExplore) {
+extraInfo = `
+<div class="d-card"><div class="d-card-label">Information</div>
+<div class="d-card-row">
+<div><i class="fas fa-clock"></i> ${item.hours}</div>
+</div>
+<div class="d-card-row" style="margin-top:8px">
+<div><i class="fas fa-indian-rupee-sign"></i> ${item.fee}</div>
+</div>
+<div class="d-card-row" style="margin-top:8px">
+<div><i class="fas fa-phone"></i> ${item.phone}</div>
+</div>
+<div class="d-card-row" style="margin-top:8px">
+<div><i class="fas fa-location-dot"></i> ${item.address}</div>
+</div>
+</div>`;
+} else if (isEmergency) {
+extraInfo = `
+<div class="d-card"><div class="d-card-label">Emergency Details</div>
+<div class="d-card-row">
+<div><i class="fas fa-phone"></i> ${item.number}</div>
+<div><i class="fas fa-route"></i> ${item.distance}</div>
+</div>
+<div class="d-card-row" style="margin-top:8px">
+<div><i class="fas fa-circle" style="color:${item.available ? '#10b981' : '#ef4444'};font-size:8px"></i> ${item.available ? 'Available' : 'Unavailable'}</div>
+<div><i class="fas fa-signal"></i> ${item.status}</div>
+</div>
+<div class="d-card-row" style="margin-top:8px">
+<div><i class="fas fa-location-dot"></i> ${item.address}</div>
+</div>
+</div>`;
+} else {
+extraInfo = `
+<div class="d-card"><div class="d-card-label">Details</div>
+<div class="d-card-row">
+<div><i class="fas fa-circle-check" style="color:var(--secondary)"></i> ${item.status}</div>
+<div><i class="fas fa-clock"></i> ${item.timings || 'N/A'}</div>
+</div>
+<div class="d-card-row" style="margin-top:8px">
+<div><i class="fas fa-phone"></i> ${item.contact || 'N/A'}</div>
+</div>
+<div class="d-card-row" style="margin-top:8px">
+<div><i class="fas fa-location-dot"></i> ${item.location || 'N/A'}</div>
+</div>
+</div>`;
+}
+
+let btnsHtml = '';
+if (isEmergency) {
+btnsHtml = `
+<div class="detail-btns">
+<button class="dbtn dbtn-danger" onclick="showToast('Calling ${item.name}...')"><i class="fas fa-phone"></i> Call ${item.number}</button>
+<button class="dbtn dbtn-secondary" onclick="showToast('Opening navigation...')"><i class="fas fa-diamond-turn-right"></i> Navigate</button>
+</div>`;
+} else if (isExplore) {
+btnsHtml = `
+<div class="detail-btns">
+<button class="dbtn dbtn-primary" onclick="showToast('Opening directions...')"><i class="fas fa-diamond-turn-right"></i> Directions</button>
+<button class="dbtn dbtn-secondary" onclick="showToast('Calling ${item.name}...')"><i class="fas fa-phone"></i> Call</button>
+<button class="dbtn dbtn-secondary" onclick="showToast('Opening website...')"><i class="fas fa-globe"></i> Website</button>
+</div>`;
+} else {
+btnsHtml = `
+<div class="detail-btns">
+<button class="dbtn dbtn-primary" onclick="showToast('Application submitted successfully!')"><i class="fas fa-paper-plane"></i> Apply Now</button>
+<button class="dbtn dbtn-secondary" onclick="showToast('Tracking your request...')"><i class="fas fa-location-crosshairs"></i> Track</button>
+</div>`;
+}
+
+const html = `
+<div class="detail-hero">
+<img src="${getImage(item.img, 430, 200)}" alt="${item.name}">
+<div class="detail-grad"></div>
+<button class="detail-back" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
+<div class="detail-actions">
+<button onclick="toggleSave('${type}',${idx},this)"><i class="fas ${saved ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i></button>
+<button onclick="shareItem('${item.name}')"><i class="fas fa-share-nodes"></i></button>
+</div>
+</div>
+<div class="detail-body">
+<h1>${item.name}</h1>
+<div class="detail-subtitle">
+ ${isExplore ? `<span class="badge badge-blue">${item.cat}</span><span class="badge badge-green">${item.rating} <i class="fas fa-star" style="font-size:9px"></i></span>` : `<span class="badge badge-green">${item.status}</span>`}
+</div>
+ ${galleryHtml}
+<p class="detail-desc">${item.desc}</p>
+ ${extraInfo}
+ ${reviewsHtml}
+<div class="detail-map">
+<img src="${getImage('map-' + item.img, 430, 140)}" alt="Map">
+<div class="map-pin"><i class="fas fa-location-dot"></i></div>
+</div>
+ ${btnsHtml}
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+openSubPage(html);
+}
+
+function toggleSave(type, idx, btn) {
+const key = `${type}-${idx}`;
+if (savedItems.has(key)) { savedItems.delete(key); showToast('Removed from saved'); }
+else { savedItems.add(key); showToast('Saved successfully'); }
+const icon = btn.querySelector('i');
+icon.className = savedItems.has(key) ? 'fas fa-solid fa-bookmark' : 'fas fa-regular fa-bookmark';
+}
+
+function shareItem(name) {
+if (navigator.share) {
+navigator.share({ title: name, text: `Check out ${name} on Smart Cityzen`, url: window.location.href });
+} else {
+showToast('Share link copied!');
+}
+}
+
+/* ========== EXPLORE TAB ========== */
+function renderExploreTab() {
+const categories = ['All','Tourist Places','Restaurants','Hospitals','Schools','Colleges','Parks','Shopping','Transport'];
+ $('#tab-explore').innerHTML = `
+<div style="padding:16px 20px 0"><h2 style="font-size:22px;font-weight:900">Explore City</h2><p style="font-size:12px;color:var(--text2);margin-top:2px">Discover places around you</p></div>
+<div style="display:flex;gap:8px;padding:12px 20px;overflow-x:auto;-webkit-overflow-scrolling:touch" class="explore-cats">
+ ${categories.map((c, i) => `<button class="nf-btn ${i === 0 ? 'active' : ''}" onclick="filterExplore(this,'${c}')">${c}</button>`).join('')}
+</div>
+<div class="list-items" id="explore-list" style="padding-top:4px">
+ ${EXPLORE_PLACES.map((item, i) => `
+<div class="list-item explore-item" data-cat="${item.cat}" onclick="openDetail('explore',${i})">
+<div class="li-icon" style="background:${item.color}"><i class="fas ${item.icon}"></i></div>
+<div class="li-info">
+<h4>${item.name}</h4>
+<p>${item.cat} &bull; ${item.rating} <i class="fas fa-star" style="color:#f59e0b;font-size:9px"></i> &bull; ${item.address}</p>
+</div>
+<i class="fas fa-chevron-right li-arrow"></i>
+</div>`).join('')}
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+}
+
+function filterExplore(btn, cat) {
+ $$('.explore-cats .nf-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+ $$('.explore-item').forEach(el => {
+el.style.display = (cat === 'All' || el.dataset.cat === cat) ? 'flex' : 'none';
+});
+}
+
+/* ========== SERVICES TAB ========== */
+function renderServicesTab() {
+ $('#tab-services').innerHTML = `
+<div style="padding:16px 20px 0;display:flex;justify-content:space-between;align-items:flex-start">
+<div><h2 style="font-size:22px;font-weight:900">City Services</h2><p style="font-size:12px;color:var(--text2);margin-top:2px">All municipal services in one place</p></div>
+<button style="width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text)" onclick="openSearch()"><i class="fas fa-magnifying-glass"></i></button>
+</div>
+<div class="list-items" style="margin-top:12px">
+ ${CITY_SERVICES.map((item, i) => `
+<div class="list-item" onclick="openDetail('city-services',${i})">
+<div class="li-icon" style="background:${item.color}"><i class="fas ${item.icon}"></i></div>
+<div class="li-info">
+<h4>${item.name}</h4>
+<p>${item.desc.substring(0, 55)}...</p>
+</div>
+<i class="fas fa-chevron-right li-arrow"></i>
+</div>`).join('')}
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+}
+
+/* ========== NOTIFICATIONS TAB ========== */
+function renderNotificationsTab() {
+const cats = ['All','Bills','Alerts','Events','Updates'];
+const unreadCount = NOTIFICATIONS.filter(n => n.unread).length;
+ $('#tab-notifications').innerHTML = `
+<div class="notif-list">
+<div class="notif-header">
+<h2>Notifications${unreadCount > 0 ? ` <span style="font-size:13px;color:var(--primary);font-weight:600">(${unreadCount} new)</span>` : ''}</h2>
+<button onclick="markAllRead()">Mark all read</button>
+</div>
+<div class="notif-filters">
+ ${cats.map((c, i) => `<button class="nf-btn ${i === 0 ? 'active' : ''}" onclick="filterNotifs(this,'${c.toLowerCase()}')">${c}</button>`).join('')}
+</div>
+<div id="notif-items">
+ ${NOTIFICATIONS.map((n, i) => `
+<div class="notif-item ${n.unread ? 'unread' : ''}" data-cat="${n.cat}" onclick="readNotif(this,${i})">
+<div class="notif-icon" style="background:${n.color}20;color:${n.color}"><i class="fas ${n.icon}"></i></div>
+<div class="notif-content">
+<h4>${n.title}</h4>
+<p>${n.desc}</p>
+<span class="nc-time">${n.time}</span>
+</div>
+</div>`).join('')}
+</div>
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+}
+
+function filterNotifs(btn, cat) {
+ $$('.notif-filters .nf-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+ $$('.notif-item').forEach(el => {
+el.style.display = (cat === 'all' || el.dataset.cat === cat) ? 'flex' : 'none';
+});
+}
+
+function markAllRead() {
+ $$('.notif-item').forEach(el => el.classList.remove('unread'));
+const badge = $('.notif-badge');
+if (badge) badge.style.display = 'none';
+showToast('All notifications marked as read');
+}
+
+function readNotif(el, idx) {
+el.classList.remove('unread');
+const n = NOTIFICATIONS[idx];
+if (n) showToast(`Opened: ${n.title}`);
+}
+
+/* ========== PROFILE TAB ========== */
+function renderProfileTab() {
+const menuItems = [
+{icon:'fa-id-card',color:'#3b82f6',name:'Digital ID',desc:'View your Smart Cityzen ID',action:'viewId'},
+{icon:'fa-bookmark',color:'#f59e0b',name:'Saved Places',desc:'Your bookmarked places',action:'saved'},
+{icon:'fa-download',color:'#059669',name:'Downloads',desc:'Downloaded documents',action:'downloads'},
+{icon:'fa-location-dot',color:'#ef4444',name:'Saved Places',desc:'Your favorite locations',action:'places'},
+{icon:'fa-gear',color:'#64748b',name:'Settings',desc:'App preferences',action:'settings'},
+{icon:'fa-shield-halved',color:'#1d4ed8',name:'Privacy & Security',desc:'Manage your data',action:'privacy'},
+{icon:'fa-circle-question',color:'#8b5cf6',name:'Help & Support',desc:'FAQs and contact',action:'help'},
+{icon:'fa-message',color:'#ec4899',name:'Send Feedback',desc:'Help us improve',action:'feedback'},
+{icon:'fa-right-from-bracket',color:'#dc2626',name:'Logout',desc:'Sign out of your account',action:'logout',danger:true}
+];
+
+ $('#tab-profile').innerHTML = `
+<div class="profile-header">
+<div class="profile-avatar">
+<img src="${CITIZEN.photo}" alt="${CITIZEN.name}">
+<div class="pa-edit"><i class="fas fa-pen"></i></div>
+</div>
+<h2>${CITIZEN.name}</h2>
+<p>${CITIZEN.id} &bull; ${CITIZEN.tier}</p>
+</div>
+<div class="profile-stats">
+<div><span>12</span><small>Services Used</small></div>
+<div><span>5</span><small>Saved Places</small></div>
+<div><span>8</span><small>Documents</small></div>
+</div>
+<div class="profile-menu">
+ ${menuItems.map(m => `
+<div class="pm-item ${m.danger ? 'danger' : ''}" onclick="handleProfileAction('${m.action}')">
+<div class="pm-icon" style="background:${m.color}"><i class="fas ${m.icon}"></i></div>
+<div class="pm-text"><h4>${m.name}</h4><p>${m.desc}</p></div>
+<i class="fas fa-chevron-right pm-arrow"></i>
+</div>`).join('')}
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+}
+
+function handleProfileAction(action) {
+switch (action) {
+case 'viewId': switchTab('home'); setTimeout(() => { const idWrap = $('.id-card-wrap'); if (idWrap) idWrap.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); break;
+case 'saved': showToast(`${savedItems.size} items saved`); break;
+case 'downloads': showToast('3 documents downloaded'); break;
+case 'places': switchTab('explore'); break;
+case 'settings': openSettings(); break;
+case 'privacy': openPrivacy(); break;
+case 'help': openHelp(); break;
+case 'feedback': openFeedback(); break;
+case 'logout': showToast('Logged out successfully'); break;
+}
+}
+
+/* ========== SETTINGS ========== */
+function openSettings() {
+const html = `
+<div class="list-page-hdr"><button onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Settings</h2></div>
+<div class="settings-list">
+<div class="settings-group"><h3>Appearance</h3>
+<div class="setting-item"><div class="si-left"><i class="fas fa-moon"></i><span>Dark Mode</span></div><div class="toggle ${isDark ? 'on' : ''}" onclick="toggleDarkMode(this)"></div></div>
+<div class="setting-item"><div class="si-left"><i class="fas fa-palette"></i><span>Theme Color</span></div><div class="si-right"><div style="display:flex;gap:6px">
+<div style="width:22px;height:22px;border-radius:50%;background:#1e40af;border:2px solid var(--primary);cursor:pointer" onclick="showToast('Royal Blue selected')"></div>
+<div style="width:22px;height:22px;border-radius:50%;background:#059669;cursor:pointer" onclick="showToast('Emerald Green selected')"></div>
+<div style="width:22px;height:22px;border-radius:50%;background:#7c3aed;cursor:pointer" onclick="showToast('Purple selected')"></div>
+</div></div></div>
+</div>
+<div class="settings-group"><h3>General</h3>
+<div class="setting-item" onclick="showToast('Language: English')"><div class="si-left"><i class="fas fa-language"></i><span>Language</span></div><div class="si-right">English <i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+<div class="setting-item"><div class="si-left"><i class="fas fa-bell"></i><span>Push Notifications</span></div><div class="toggle on" onclick="this.classList.toggle('on');showToast(this.classList.contains('on')?'Notifications enabled':'Notifications disabled')"></div></div>
+<div class="setting-item"><div class="si-left"><i class="fas fa-volume-high"></i><span>Sound</span></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+<div class="setting-item"><div class="si-left"><i class="fas fa-fingerprint"></i><span>Biometric Login</span></div><div class="toggle" onclick="this.classList.toggle('on');showToast(this.classList.contains('on')?'Biometric enabled':'Biometric disabled')"></div></div>
+</div>
+<div class="settings-group"><h3>Data & Storage</h3>
+<div class="setting-item" onclick="showToast('Cache cleared: 24 MB freed')"><div class="si-left"><i class="fas fa-broom"></i><span>Clear Cache</span></div><div class="si-right">24 MB <i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+<div class="setting-item" onclick="showToast('Storage: 156 MB used')"><div class="si-left"><i class="fas fa-hard-drive"></i><span>Storage</span></div><div class="si-right">156 MB <i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+</div>
+<div class="settings-group"><h3>About</h3>
+<div class="setting-item"><div class="si-left"><i class="fas fa-info-circle"></i><span>Version</span></div><div class="si-right">2.4.1</div></div>
+<div class="setting-item" onclick="showToast('Checking for updates...')"><div class="si-left"><i class="fas fa-rotate"></i><span>Check for Updates</span></div><div class="si-right"><i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+<div class="setting-item" onclick="showToast('Opening support...')"><div class="si-left"><i class="fas fa-headset"></i><span>Contact Support</span></div><div class="si-right"><i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+</div>
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+openSubPage(html);
+}
+
+function toggleDarkMode(toggle) {
+isDark = !isDark;
+document.body.classList.toggle('dark', isDark);
+if (toggle) toggle.classList.toggle('on', isDark);
+showToast(isDark ? 'Dark mode enabled' : 'Light mode enabled');
+}
+
+function openPrivacy() {
+const html = `
+<div class="list-page-hdr"><button onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Privacy & Security</h2></div>
+<div class="settings-list">
+<div class="settings-group"><h3>Privacy</h3>
+<div class="setting-item"><div class="si-left"><i class="fas fa-eye-slash"></i><span>Hide Profile from Others</span></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+<div class="setting-item"><div class="si-left"><i class="fas fa-location-crosshairs"></i><span>Location Sharing</span></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+<div class="setting-item"><div class="si-left"><i class="fas fa-chart-line"></i><span>Usage Analytics</span></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+</div>
+<div class="settings-group"><h3>Security</h3>
+<div class="setting-item" onclick="showToast('Change password feature')"><div class="si-left"><i class="fas fa-key"></i><span>Change Password</span></div><div class="si-right"><i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+<div class="setting-item"><div class="si-left"><i class="fas fa-shield-halved"></i><span>Two-Factor Authentication</span></div><div class="toggle" onclick="this.classList.toggle('on');showToast(this.classList.contains('on')?'2FA enabled':'2FA disabled')"></div></div>
+<div class="setting-item" onclick="showToast('Showing active sessions...')"><div class="si-left"><i class="fas fa-laptop"></i><span>Active Sessions</span></div><div class="si-right">2 devices <i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+</div>
+<div class="settings-group"><h3>Data</h3>
+<div class="setting-item" onclick="showToast('Request submitted. You will receive data within 30 days.')"><div class="si-left"><i class="fas fa-download"></i><span>Download My Data</span></div><div class="si-right"><i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+<div class="setting-item" onclick="showToast('Please contact support to delete your account.')"><div class="si-left"><i class="fas fa-trash" style="color:#dc2626"></i><span style="color:#dc2626">Delete Account</span></div><div class="si-right"><i class="fas fa-chevron-right" style="font-size:10px"></i></div></div>
+</div>
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+openSubPage(html);
+}
+
+function openHelp() {
+const faqs = [
+{q:'How do I get my Digital City ID?',a:'Your Digital City ID is automatically generated when you register on Smart Cityzen. You can view it on the Home dashboard.'},
+{q:'How to pay water/electricity bills?',a:'Go to City Services > Water Bill or Electricity. Enter your consumer number and proceed to payment through our secure gateway.'},
+{q:'Is my data safe on Smart Cityzen?',a:'Yes, we use end-to-end encryption and comply with all data protection regulations. Your personal information is never shared with third parties.'},
+{q:'How do I report a civic issue?',a:'Navigate to City Services > Complaints. Fill in the details, attach photos if needed, and submit. You can track the resolution status in real-time.'},
+{q:'What happens when I tap SOS?',a:'The SOS button sends your live GPS location to your emergency contacts and the nearest emergency response center immediately.'}
+];
+const html = `
+<div class="list-page-hdr"><button onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Help & Support</h2></div>
+<div style="padding:0 20px 100px">
+<div style="padding:20px;background:var(--surface);border-radius:var(--rs);border:1px solid var(--border);text-align:center;margin-bottom:20px">
+<i class="fas fa-headset" style="font-size:36px;color:var(--primary);margin-bottom:8px"></i>
+<h3 style="font-size:15px;font-weight:700">Need Help?</h3>
+<p style="font-size:12px;color:var(--text2);margin:4px 0 12px">We're here to assist you 24/7</p>
+<div style="display:flex;gap:10px;justify-content:center">
+<button class="dbtn dbtn-primary" style="flex:none;padding:10px 20px;border-radius:var(--rxs);font-size:12px;font-weight:700" onclick="showToast('Connecting to live chat...')"><i class="fas fa-comment"></i> Live Chat</button>
+<button class="dbtn dbtn-secondary" style="flex:none;padding:10px 20px;border-radius:var(--rxs);font-size:12px;font-weight:700;border:1.5px solid var(--border)" onclick="showToast('Calling support...')"><i class="fas fa-phone"></i> Call Us</button>
+</div>
+</div>
+<h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Frequently Asked Questions</h3>
+ ${faqs.map((f, i) => `
+<div class="d-card" style="margin-bottom:8px;cursor:pointer" onclick="this.querySelector('.faq-a').style.display=this.querySelector('.faq-a').style.display==='block'?'none':'block'">
+<div class="d-card-value" style="display:flex;justify-content:space-between;align-items:center">
+<span>${f.q}</span>
+<i class="fas fa-chevron-down" style="font-size:10px;color:var(--text3)"></i>
+</div>
+<div class="faq-a" style="display:none;margin-top:8px;font-size:12px;color:var(--text2);line-height:1.6;font-weight:400">${f.a}</div>
+</div>`).join('')}
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+openSubPage(html);
+}
+
+function openFeedback() {
+const html = `
+<div class="list-page-hdr"><button onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Send Feedback</h2></div>
+<div style="padding:20px 20px 100px">
+<div class="d-card" style="margin-bottom:16px;text-align:center;padding:24px">
+<i class="fas fa-message" style="font-size:40px;color:var(--primary);margin-bottom:8px"></i>
+<h3 style="font-size:16px;font-weight:700">Your Feedback Matters</h3>
+<p style="font-size:12px;color:var(--text2);margin-top:4px">Help us build a better Smart Cityzen</p>
+</div>
+<div style="margin-bottom:16px">
+<label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:6px">Category</label>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="nf-btn active" onclick="selectFeedbackCat(this)">Bug Report</button>
+<button class="nf-btn" onclick="selectFeedbackCat(this)">Feature Request</button>
+<button class="nf-btn" onclick="selectFeedbackCat(this)">General</button>
+<button class="nf-btn" onclick="selectFeedbackCat(this)">Complaint</button>
+</div>
+</div>
+<div style="margin-bottom:16px">
+<label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:6px">Subject</label>
+<div class="input-group"><i class="fas fa-pen"></i><input type="text" placeholder="Brief subject of your feedback" style="width:100%;padding:12px 12px 12px 38px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;color:var(--text)" id="fb-subject"></div>
+</div>
+<div style="margin-bottom:16px">
+<label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:6px">Message</label>
+<textarea placeholder="Describe your feedback in detail..." style="width:100%;padding:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;color:var(--text);min-height:120px;resize:none;font-family:inherit" id="fb-message"></textarea>
+</div>
+<button class="btn-primary" style="width:100%" onclick="submitFeedback()">Submit Feedback</button>
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+openSubPage(html);
+}
+
+function selectFeedbackCat(btn) {
+btn.parentElement.querySelectorAll('.nf-btn').forEach(b => b.classList.remove('active'));
+btn.classList.add('active');
+}
+
+function submitFeedback() {
+const subject = $('#fb-subject');
+const message = $('#fb-message');
+if (!subject || !message) return;
+if (!subject.value.trim()) { showToast('Please enter a subject'); return; }
+if (!message.value.trim()) { showToast('Please enter your message'); return; }
+showToast('Thank you! Feedback submitted successfully');
+setTimeout(() => goBack(), 800);
+}
+
+/* ========== TERMS ========== */
+function openTerms() {
+const html = `
+<div class="list-page-hdr"><button onclick="goBack()"><i class="fas fa-arrow-left"></i></button><h2>Terms & Privacy Policy</h2></div>
+<div class="terms-content">
+<h3>1. Acceptance of Terms</h3>
+<p>By accessing and using Smart Cityzen, you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to these terms, you should not use this application.</p>
+<h3>2. Digital Citizen Identity</h3>
+<p>The Smart Cityzen Digital ID is a verified digital identity issued by the city administration. It is non-transferable and must be used only by the registered citizen. Misuse of the Digital ID may result in legal action and revocation of access.</p>
+<h3>3. Data Collection & Usage</h3>
+<p>We collect personal information necessary to provide city services including name, address, contact details, and service usage data. All data is processed in compliance with the Digital Personal Data Protection Act, 2023.</p>
+<h3>4. Privacy Protection</h3>
+<p>Your personal data is encrypted end-to-end and stored on secure government servers. We do not sell, share, or distribute your personal information to third parties without your explicit consent, except as required by law.</p>
+<h3>5. Service Availability</h3>
+<p>Smart Cityzen strives to provide uninterrupted service but does not guarantee 100% availability. Scheduled maintenance and emergency outages may occur. We will notify users in advance of planned maintenance.</p>
+<h3>6. User Responsibilities</h3>
+<p>Users are responsible for maintaining the confidentiality of their login credentials. Any activity under your account is your responsibility. Report unauthorized access immediately to the support team.</p>
+<h3>7. Emergency Services</h3>
+<p>The SOS and emergency features are supplementary tools and should not replace calling emergency services directly. The city administration is not liable for delays in emergency response.</p>
+<h3>8. Payments & Transactions</h3>
+<p>All bill payments and financial transactions are processed through authorized payment gateways. Smart Cityzen does not store your payment card details. Transaction failures due to bank or network issues are not our liability.</p>
+<h3>9. Modifications</h3>
+<p>We reserve the right to modify these terms at any time. Users will be notified of significant changes. Continued use of the application after changes constitutes acceptance of the revised terms.</p>
+<h3>10. Contact</h3>
+<p>For any questions regarding these terms, contact us at: legal@smartcityzen.gov | Helpline: 1800-SCZ-HELP</p>
+</div>
+<div class="app-footer">Powered by <strong>Smart Cityzen</strong><br>Building Smarter Cities Digitally</div>`;
+openSubPage(html);
+}
+
+/* ========== SEARCH ========== */
+function renderSearchOverlay() {
+ $('#search-overlay').innerHTML = `
+<div class="search-hdr">
+<button onclick="closeSearch()"><i class="fas fa-arrow-left"></i></button>
+<div class="sh-input">
+<input type="text" placeholder="Search services, places..." id="search-input" oninput="handleSearchInput(this.value)">
+<button class="mic-btn" onclick="startVoiceSearch()"><i class="fas fa-microphone"></i></button>
+</div>
+</div>
+<div class="search-section" id="search-results">
+<h3>Recent Searches</h3>
+<div class="recent-chips">${RECENT_SEARCHES.map(s => `<div class="chip" onclick="searchFor('${s}')">${s}</div>`).join('')}</div>
+<h3>Trending</h3>
+<div class="recent-chips">${TRENDING_SEARCHES.map(s => `<div class="chip" onclick="searchFor('${s}')"><i class="fas fa-arrow-trend-up" style="font-size:10px;color:var(--secondary);margin-right:4px"></i>${s}</div>`).join('')}</div>
+</div>`;
+}
+
+function handleSearchInput(query) {
+const container = $('#search-results');
+if (!query.trim()) {
+renderSearchOverlay();
+return;
+}
+const q = query.toLowerCase();
+const allItems = [
+...CITY_SERVICES.map((s, i) => ({...s, type:'city-services', idx:i, cat:'City Services'})),
+...EXPLORE_PLACES.map((s, i) => ({...s, type:'explore', idx:i, cat:'Explore'})),
+...CITIZEN_SERVICES.map((s, i) => ({...s, type:'citizen', idx:i, cat:'Citizen'})),
+...EMERGENCY_SERVICES.map((s, i) => ({...s, type:'emergency', idx:i, cat:'Emergency'}))
+];
+const results = allItems.filter(item => item.name.toLowerCase().includes(q) || (item.desc && item.desc.toLowerCase().includes(q)) || (item.cat && item.cat.toLowerCase().includes(q)));
+
+if (results.length === 0) {
+container.innerHTML = `<div style="text-align:center;padding:40px 0"><i class="fas fa-search" style="font-size:40px;color:var(--text3);margin-bottom:12px"></i><p style="font-size:14px;color:var(--text2)">No results found for "${query}"</p><p style="font-size:12px;color:var(--text3);margin-top:4px">Try different keywords</p></div>`;
+return;
+}
+
+container.innerHTML = `<h3>${results.length} Results</h3><div class="search-results">${results.map(r => `
+<div class="sr-item" onclick="closeSearch();setTimeout(()=>openDetail('${r.type}',${r.idx}),350)">
+<div class="sr-icon" style="background:${r.color}"><i class="fas ${r.icon}"></i></div>
+<div class="sr-info"><h4>${r.name}</h4><p>${r.cat}${r.address ? ' &bull; ' + r.address : ''}</p></div>
+<span class="sr-cat">${r.cat}</span>
+</div>`).join('')}</div>`;
+}
+
+function searchFor(query) {
+const input = $('#search-input');
+if (input) { input.value = query; handleSearchInput(query); }
+}
+
+function startVoiceSearch() {
+const modal = $('#voice-modal');
+modal.classList.add('active');
+setTimeout(() => { modal.classList.remove('active'); showToast('Voice search not available in browser'); }, 2500);
+}
+
+/* ========== INIT ========== */
+document.addEventListener('DOMContentLoaded', () => {
+initSplash();
+});
+
+document.addEventListener('keydown', (e) => {
+if (e.key === 'Escape' || e.key === 'Backspace') {
+if ($('#search-overlay').classList.contains('active')) { closeSearch(); e.preventDefault(); }
+else if (subPageStack.length > 0) { goBack(); e.preventDefault(); }
+}
+});
+
+ $('#voice-modal').addEventListener('click', function() { this.classList.remove('active'); });
+</script>
+</body>
+</html>
